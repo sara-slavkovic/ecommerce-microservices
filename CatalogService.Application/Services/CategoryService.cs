@@ -83,6 +83,18 @@ namespace CatalogService.Application.Services
 
         public async Task<bool> DeleteCategoryAsync(Guid id)
         {
+            var hasSubcategories = await _categoryRepository.HasSubcategoriesAsync(id);
+            if (hasSubcategories)
+            {
+                return false;
+            }
+
+            var hasProducts = await _categoryRepository.HasProductsAsync(id);
+            if (hasProducts)
+            {
+                return false;
+            }
+
             return await _categoryRepository.DeleteCategoryAsync(id);
         }
     }

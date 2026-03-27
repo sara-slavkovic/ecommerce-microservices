@@ -38,7 +38,7 @@ namespace CatalogService.Infrastructure.Repositories
         {
             var existingCategory = await _context.Categories.FindAsync(category.Id);
 
-            if(existingCategory == null)
+            if (existingCategory == null)
             {
                 return null;
             }
@@ -54,7 +54,7 @@ namespace CatalogService.Infrastructure.Repositories
         {
             var category = await _context.Categories.FindAsync(id);
 
-            if(category == null)
+            if (category == null)
             {
                 return false;
             }
@@ -62,6 +62,16 @@ namespace CatalogService.Infrastructure.Repositories
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<bool> HasSubcategoriesAsync(Guid categoryId)
+        {
+            return await _context.Categories.AnyAsync(c => c.ParentCategoryId == categoryId);
+        }
+
+        public async Task<bool> HasProductsAsync(Guid categoryId)
+        {
+            return await _context.Products.AnyAsync(p => p.CategoryId == categoryId);
         }
     }
 }
