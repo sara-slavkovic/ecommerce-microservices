@@ -1,6 +1,14 @@
 <Solution>
-  <Project Path="src/Services/Catalog/CatalogService.Api/CatalogService.Api.csproj" />
-  <Project Path="src/Services/Catalog/CatalogService.Application/CatalogService.Application.csproj" />
-  <Project Path="src/Services/Catalog/CatalogService.Domain/CatalogService.Domain.csproj" />
-  <Project Path="src/Services/Catalog/CatalogService.Infrastructure/CatalogService.Infrastructure.csproj" />
+  <Folder Name="/Catalog/">
+    <Project Path="src/Services/Catalog/CatalogService.Api/CatalogService.Api.csproj" />
+    <Project Path="src/Services/Catalog/CatalogService.Application/CatalogService.Application.csproj" />
+    <Project Path="src/Services/Catalog/CatalogService.Domain/CatalogService.Domain.csproj" />
+    <Project Path="src/Services/Catalog/CatalogService.Infrastructure/CatalogService.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Inventory/">
+    <Project Path="src/Services/Inventory/InventoryService.Api/InventoryService.Api.csproj" Id="8bf131a2-3cea-4db5-b8c1-1f8a1137abdc" />
+    <Project Path="src/Services/Inventory/InventoryService.Application/InventoryService.Application.csproj" Id="fc37eda7-67b0-4bb5-baf9-b0160f0fcc11" />
+    <Project Path="src/Services/Inventory/InventoryService.Domain/InventoryService.Domain.csproj" Id="6573c0b9-3bb5-4b5d-8007-d5b0a73073a1" />
+    <Project Path="src/Services/Inventory/InventoryService.Infrastructure/InventoryService.Infrastructure.csproj" Id="5abcd801-4091-4efb-8b3d-d0c9f1a84119" />
+  </Folder>
 </Solution>
