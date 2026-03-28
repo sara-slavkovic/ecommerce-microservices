@@ -2,6 +2,7 @@
 using CatalogService.Application.Enums;
 using CatalogService.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace CatalogService.Api.Controllers
 {
@@ -17,6 +18,7 @@ namespace CatalogService.Api.Controllers
         }
 
         [HttpGet]
+        [SwaggerOperation(Summary = "Get all categories")]
         public async Task<IActionResult> GetAllCategories()
         {
             var categories = await _categoryService.GetAllCategoriesAsync();
@@ -24,6 +26,7 @@ namespace CatalogService.Api.Controllers
         }
 
         [HttpGet("{id:guid}")]
+        [SwaggerOperation(Summary = "Get category by ID")]
         public async Task<IActionResult> GetCategoryById(Guid id)
         {
             var category = await _categoryService.GetCategoryByIdAsync(id);
@@ -37,6 +40,7 @@ namespace CatalogService.Api.Controllers
         }
 
         [HttpPost]
+        [SwaggerOperation(Summary = "Create category")]
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto dto)
         {
             var createdCategory = await _categoryService.CreateCategoryAsync(dto);
@@ -44,6 +48,7 @@ namespace CatalogService.Api.Controllers
         }
 
         [HttpPut("{id:guid}")]
+        [SwaggerOperation("Update category")]
         public async Task<IActionResult> UpdateCategory(Guid id, [FromBody] UpdateCategoryDto dto)
         {
             var updatedCategory = await _categoryService.UpdateCategoryAsync(id, dto);
@@ -57,6 +62,7 @@ namespace CatalogService.Api.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [SwaggerOperation("Delete category")]
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
             var result = await _categoryService.DeleteCategoryAsync(id);
