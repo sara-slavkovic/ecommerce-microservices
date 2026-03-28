@@ -50,18 +50,17 @@ namespace CatalogService.Infrastructure.Repositories
             return existingCategory;
         }
 
-        public async Task<bool> DeleteCategoryAsync(Guid id)
+        public async Task DeleteCategoryAsync(Guid id)
         {
             var category = await _context.Categories.FindAsync(id);
 
             if (category == null)
             {
-                return false;
+                return;
             }
 
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
-            return true;
         }
 
         public async Task<bool> HasSubcategoriesAsync(Guid categoryId)

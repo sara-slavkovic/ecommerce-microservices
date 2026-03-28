@@ -1,4 +1,5 @@
 ﻿using CatalogService.Application.DTOs;
+using CatalogService.Application.Enums;
 using CatalogService.Application.Interfaces;
 using CatalogService.Domain.Entities;
 using System;
@@ -81,21 +82,29 @@ namespace CatalogService.Application.Services
             };
         }
 
-        public async Task<bool> DeleteCategoryAsync(Guid id)
+        public async Task<DeleteCategoryResult> DeleteCategoryAsync(Guid id)
         {
+            var category = await _categoryRepository.GetCategoryByIdAsync(id);
+
+            if (category == null)
+            {
+                return DeleteCategoryResult.NotFound;
+            }
+
             var hasSubcategories = await _categoryRepository.HasSubcategoriesAsync(id);
             if (hasSubcategories)
             {
-                return false;
+                return DeleteCategoryResult.HasSubcategories;
             }
 
             var hasProducts = await _categoryRepository.HasProductsAsync(id);
             if (hasProducts)
             {
-                return false;
+                return DeleteCategoryResult.HasProducts;
             }
 
-            return await _categoryRepository.DeleteCategoryAsync(id);
+            await _categoryRepository.DeleteCategoryAsync(id);
+            return DeleteCategoryResult.Success;
         }
     }
 }

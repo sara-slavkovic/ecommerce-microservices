@@ -11,7 +11,7 @@ namespace CatalogService.Application.Interfaces
         Task<Category?> GetCategoryByIdAsync(Guid id);
         Task<Category> AddCategoryAsync(Category category);
         Task<Category?> UpdateCategoryAsync(Category category);
-        Task<bool>DeleteCategoryAsync(Guid id);
+        Task DeleteCategoryAsync(Guid id);
         Task<bool> HasSubcategoriesAsync(Guid categoryId);
         Task<bool> HasProductsAsync(Guid categoryId);
     }

@@ -1,4 +1,5 @@
 ﻿using CatalogService.Application.DTOs;
+using CatalogService.Application.Enums;
 using CatalogService.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -58,14 +59,16 @@ namespace CatalogService.Api.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
-            var deleted = await _categoryService.DeleteCategoryAsync(id);
+            var result = await _categoryService.DeleteCategoryAsync(id);
 
-            if (!deleted)
+            return result switch
             {
-                return NotFound();
-            }
-
-            return NoContent();
+                DeleteCategoryResult.Success => NoContent(),
+                DeleteCategoryResult.NotFound => NotFound(),
+                DeleteCategoryResult.HasSubcategories => Conflict(new { message = "Category has subcategories and cannot be deleted." }),
+                DeleteCategoryResult.HasProducts => Conflict(new { message = "Category has products and cannot be deleted." }),
+                _ => StatusCode(500, new { message = "An unexpected error occurred while deleting the category." })
+            };
         }
     }
 }
