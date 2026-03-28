@@ -11,10 +11,12 @@ namespace CatalogService.Api.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly IImageService _imageService;
 
-        public ProductsController(IProductService productService)
+        public ProductsController(IProductService productService, IImageService imageService)
         {
             _productService = productService;
+            _imageService = imageService;
         }
 
         [HttpGet]
@@ -89,6 +91,26 @@ namespace CatalogService.Api.Controllers
                 return NotFound();
 
             return NoContent();
+        }
+
+        [HttpPost("upload-image")]
+        [SwaggerOperation(Summary = "Upload product image")]
+        public async Task<IActionResult> UploadImage(IFormFile file, [FromForm] string productName)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest(new { message = "No file was uploaded." });
+
+            try
+            {
+                using var stream = file.OpenReadStream();
+                var imageUrl = await _imageService.UploadProductImageAsync(stream, file.FileName, productName);
+
+                return Ok(new { imageUrl });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

@@ -19,6 +19,8 @@ builder.Services.AddScoped<CatalogService.Application.Interfaces.ICategoryServic
 builder.Services.AddScoped<CatalogService.Application.Interfaces.IProductRepository, CatalogService.Infrastructure.Repositories.ProductRepository>();
 builder.Services.AddScoped<CatalogService.Application.Interfaces.IProductService, CatalogService.Application.Services.ProductService>();
 
+builder.Services.AddScoped<CatalogService.Application.Interfaces.IImageService, CatalogService.Infrastructure.Services.ImageService>();
+
 var app = builder.Build();
 
 app.UseStaticFiles();
