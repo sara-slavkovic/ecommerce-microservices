@@ -14,5 +14,6 @@ namespace CatalogService.Application.DTOs
         public string ImageUrl { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public Guid CategoryId { get; set; }
+        public int InitialStockQuantity { get; set; }
     }
 }

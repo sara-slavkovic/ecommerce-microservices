@@ -10,10 +10,12 @@ namespace CatalogService.Application.Services
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly IInventoryServiceClient _inventoryServiceClient;
 
-        public ProductService(IProductRepository productRepository)
+        public ProductService(IProductRepository productRepository, IInventoryServiceClient inventoryServiceClient)
         {
             _productRepository = productRepository;
+            _inventoryServiceClient = inventoryServiceClient;
         }
 
         public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
@@ -66,6 +68,16 @@ namespace CatalogService.Application.Services
 
             var createdProduct = await _productRepository.AddProductAsync(product);
 
+            try
+            {
+                await _inventoryServiceClient.CreateInventoryItemAsync(createdProduct.Id, dto.InitialStockQuantity);
+            }
+            catch (Exception)
+            {
+                await _productRepository.DeleteProductAsync(createdProduct.Id);
+                throw new Exception("Product was created, but inventory creation failed. Product creation has been rolled back.");
+            }
+
             return MapToDto(createdProduct);
         }
 
@@ -112,6 +124,7 @@ namespace CatalogService.Application.Services
                 return false;
             }
 
+            await _inventoryServiceClient.DeleteInventoryItemByProductIdAsync(id);
             await _productRepository.DeleteProductAsync(id);
             return true;
         }

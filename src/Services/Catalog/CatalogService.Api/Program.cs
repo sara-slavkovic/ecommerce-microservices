@@ -21,6 +21,11 @@ builder.Services.AddScoped<CatalogService.Application.Interfaces.IProductService
 
 builder.Services.AddScoped<CatalogService.Application.Interfaces.IImageService, CatalogService.Infrastructure.Services.ImageService>();
 
+builder.Services.AddHttpClient<CatalogService.Application.Interfaces.IInventoryServiceClient, CatalogService.Infrastructure.Clients.InventoryServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Services:InventoryService"] ?? throw new Exception("InventoryService URL is not configured."));
+});
+
 var app = builder.Build();
 
 app.UseStaticFiles();
