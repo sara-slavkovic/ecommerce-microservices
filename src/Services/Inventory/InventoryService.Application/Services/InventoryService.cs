@@ -1,4 +1,5 @@
-﻿using InventoryService.Application.DTOs;
+﻿using FluentValidation;
+using InventoryService.Application.DTOs;
 using InventoryService.Application.Interfaces;
 using InventoryService.Domain.Entities;
 using System;
@@ -11,10 +12,14 @@ namespace InventoryService.Application.Services
     public class InventoryService : IInventoryService
     {
         private readonly IInventoryRepository _inventoryRepository;
+        private readonly IValidator<CreateInventoryItemDto> _createValidator;
+        private readonly IValidator<UpdateInventoryItemDto> _updateValidator;
 
-        public InventoryService(IInventoryRepository inventoryRepository)
+        public InventoryService(IInventoryRepository inventoryRepository, IValidator<CreateInventoryItemDto> createValidator, IValidator<UpdateInventoryItemDto> updateValidator)
         {
             _inventoryRepository = inventoryRepository;
+            _createValidator = createValidator;
+            _updateValidator = updateValidator;
         }
 
         public async Task<IEnumerable<InventoryItemDto>> GetAllInventoryItemsAsync()
@@ -40,6 +45,12 @@ namespace InventoryService.Application.Services
 
         public async Task<InventoryItemDto> CreateInventoryItemAsync(CreateInventoryItemDto dto)
         {
+            var validationResult = await _createValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             var exists = await _inventoryRepository.ExistsByProductIdAsync(dto.ProductId);
             if (exists)
             {
@@ -62,6 +73,12 @@ namespace InventoryService.Application.Services
 
         public async Task<InventoryItemDto?> UpdateInventoryItemAsync(Guid id, UpdateInventoryItemDto dto)
         {
+            var validationResult = await _updateValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             var existingInventoryItem = await _inventoryRepository.GetInventoryItemByIdAsync(id);
             if (existingInventoryItem == null)
             {

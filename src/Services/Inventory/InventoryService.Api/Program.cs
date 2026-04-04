@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,8 @@ builder.Services.AddDbContext<InventoryService.Infrastructure.Persistence.Invent
 
 builder.Services.AddScoped<InventoryService.Application.Interfaces.IInventoryRepository, InventoryService.Infrastructure.Repositories.InventoryRepository>();
 builder.Services.AddScoped<InventoryService.Application.Interfaces.IInventoryService, InventoryService.Application.Services.InventoryService>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<InventoryService.Application.Validators.CreateInventoryItemDtoValidator>(ServiceLifetime.Transient);
 
 var app = builder.Build();
 
