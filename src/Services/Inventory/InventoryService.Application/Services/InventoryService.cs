@@ -43,7 +43,7 @@ namespace InventoryService.Application.Services
             var exists = await _inventoryRepository.ExistsByProductIdAsync(dto.ProductId);
             if (exists)
             {
-                throw new Exception("Inventory item for this product already exists.");
+                throw new InvalidOperationException("Inventory item for this product already exists.");
             }
 
             var inventoryItem = new InventoryItem

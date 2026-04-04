@@ -14,7 +14,7 @@ namespace CatalogService.Infrastructure.Services
             var extension = Path.GetExtension(originalFileName).ToLowerInvariant();
 
             if (!allowedExtensions.Contains(extension))
-                throw new Exception("Only .jpg .jpeg .png and .webp files are allowed.");
+                throw new ArgumentException("Only .jpg .jpeg .png and .webp files are allowed.");
 
             var imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
 

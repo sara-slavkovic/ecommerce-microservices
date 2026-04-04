@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +26,9 @@ builder.Services.AddHttpClient<CatalogService.Application.Interfaces.IInventoryS
 {
     client.BaseAddress = new Uri(builder.Configuration["Services:InventoryService"] ?? throw new Exception("InventoryService URL is not configured."));
 });
+
+builder.Services.AddValidatorsFromAssemblyContaining<CatalogService.Application.Validators.CreateCategoryDtoValidator>(ServiceLifetime.Transient);
+//builder.Services.AddValidatorsFromAssemblyContaining<CatalogService.Application.Validators.UpdateCategoryDtoValidator>(ServiceLifetime.Transient);
 
 var app = builder.Build();
 

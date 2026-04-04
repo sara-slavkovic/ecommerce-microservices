@@ -30,7 +30,7 @@ namespace CatalogService.Infrastructure.Clients
             if (!response.IsSuccessStatusCode)
             {
                 var errorMessage = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Failed to create inventory item. {errorMessage}");
+                throw new InvalidOperationException($"Failed to create inventory item. {errorMessage}");
             }
         }
 
@@ -41,7 +41,7 @@ namespace CatalogService.Infrastructure.Clients
             if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.NotFound)
             {
                 var errorMessage = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Failed to delete inventory item. {errorMessage}");
+                throw new InvalidOperationException($"Failed to delete inventory item. {errorMessage}");
             }
         }
     }

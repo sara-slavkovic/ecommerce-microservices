@@ -1,6 +1,7 @@
 ﻿using CatalogService.Application.DTOs;
 using CatalogService.Application.Interfaces;
 using CatalogService.Domain.Entities;
+using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,11 +12,15 @@ namespace CatalogService.Application.Services
     {
         private readonly IProductRepository _productRepository;
         private readonly IInventoryServiceClient _inventoryServiceClient;
+        private readonly IValidator<CreateProductDto> _createValidator;
+        private readonly IValidator<UpdateProductDto> _updateValidator;
 
-        public ProductService(IProductRepository productRepository, IInventoryServiceClient inventoryServiceClient)
+        public ProductService(IProductRepository productRepository, IInventoryServiceClient inventoryServiceClient, IValidator<CreateProductDto> createValidator, IValidator<UpdateProductDto> updateValidator)
         {
             _productRepository = productRepository;
             _inventoryServiceClient = inventoryServiceClient;
+            _createValidator = createValidator;
+            _updateValidator = updateValidator;
         }
 
         public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
@@ -41,16 +46,22 @@ namespace CatalogService.Application.Services
 
         public async Task<ProductDto> CreateProductAsync(CreateProductDto dto)
         {
+            var validationResult = await _createValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             var categoryExists = await _productRepository.CategoryExistsAsync(dto.CategoryId);
             if (!categoryExists)
             {
-                throw new Exception("Category does not exist.");
+                throw new InvalidOperationException("Category does not exist.");
             }
 
             var skuExists = await _productRepository.ExistsBySkuAsync(dto.Sku);
             if (skuExists)
             {
-                throw new Exception("Product with this SKU already exists.");
+                throw new InvalidOperationException("Product with this SKU already exists.");
             }
 
             var product = new Product
@@ -75,7 +86,7 @@ namespace CatalogService.Application.Services
             catch (Exception)
             {
                 await _productRepository.DeleteProductAsync(createdProduct.Id);
-                throw new Exception("Product was created, but inventory creation failed. Product creation has been rolled back.");
+                throw new InvalidOperationException("Product was created, but inventory creation failed. Product creation has been rolled back.");
             }
 
             return MapToDto(createdProduct);
@@ -83,6 +94,12 @@ namespace CatalogService.Application.Services
 
         public async Task<ProductDto?> UpdateProductAsync(Guid id, UpdateProductDto dto)
         {
+            var validationResult = await _updateValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             var existingProduct = await _productRepository.GetProductByIdAsync(id);
             if (existingProduct == null)
             {
@@ -92,13 +109,13 @@ namespace CatalogService.Application.Services
             var categoryExists = await _productRepository.CategoryExistsAsync(dto.CategoryId);
             if (!categoryExists)
             {
-                throw new Exception("Category does not exist.");
+                throw new InvalidOperationException("Category does not exist.");
             }
 
             var skuExists = await _productRepository.ExistsBySkuExcludingIdAsync(dto.Sku, id);
             if (skuExists)
             {
-                throw new Exception("Another product with this SKU already exists.");
+                throw new InvalidOperationException("Another product with this SKU already exists.");
             }
 
             existingProduct.Sku = dto.Sku;
