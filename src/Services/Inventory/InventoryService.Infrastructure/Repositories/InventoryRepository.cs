@@ -73,5 +73,16 @@ namespace InventoryService.Infrastructure.Repositories
             _context.InventoryItems.Remove(inventoryItem);
             await _context.SaveChangesAsync();
         }
+
+        public async Task DeleteInventoryItemByProductIdAsync(Guid productId)
+        {
+            var inventoryItem = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+
+            if (inventoryItem == null)
+                return;
+
+            _context.InventoryItems.Remove(inventoryItem);
+            await _context.SaveChangesAsync();
+        }
     }
 }

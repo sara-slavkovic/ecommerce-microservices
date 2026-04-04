@@ -14,5 +14,6 @@ namespace InventoryService.Application.Interfaces
         Task<InventoryItemDto> CreateInventoryItemAsync(CreateInventoryItemDto dto);
         Task<InventoryItemDto?> UpdateInventoryItemAsync(Guid id, UpdateInventoryItemDto dto);
         Task<bool> DeleteInventoryItemAsync(Guid id);
+        Task<bool> DeleteInventoryItemByProductIdAsync(Guid productId);
     }
 }

@@ -94,5 +94,17 @@ namespace InventoryService.Api.Controllers
             }
             return NoContent();
         }
+
+        [HttpDelete("product/{productId:guid}")]
+        [SwaggerOperation(Summary = "Delete inventory item by product ID")]
+        public async Task<IActionResult> DeleteInventoryItemByProductId(Guid productId)
+        {
+            var deleted = await _inventoryService.DeleteInventoryItemByProductIdAsync(productId);
+            if (!deleted)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
     }
 }

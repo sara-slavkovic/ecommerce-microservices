@@ -89,6 +89,18 @@ namespace InventoryService.Application.Services
             return true;
         }
 
+        public async Task<bool> DeleteInventoryItemByProductIdAsync(Guid productId)
+        {
+            var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(productId);
+            if (inventoryItem == null)
+            {
+                return false;
+            }
+
+            await _inventoryRepository.DeleteInventoryItemByProductIdAsync(inventoryItem.ProductId);
+            return true;
+        }
+
         private static InventoryItemDto MapToDto(InventoryItem inventoryItem)
         {
             return new InventoryItemDto
