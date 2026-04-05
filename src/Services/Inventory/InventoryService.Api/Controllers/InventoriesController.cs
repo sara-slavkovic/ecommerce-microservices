@@ -1,4 +1,5 @@
 ﻿using InventoryService.Application.DTOs;
+using InventoryService.Application.Enums;
 using InventoryService.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -49,7 +50,8 @@ namespace InventoryService.Api.Controllers
             return Ok(inventoryItem);
         }
 
-        [HttpPost]
+        // This endpoint should only be called by CatalogService, so that inventory item cannot be created without a valid product
+        [HttpPost("internal")]
         [SwaggerOperation(Summary = "Create inventory item")]
         public async Task<IActionResult> CreateInventoryItem([FromBody] CreateInventoryItemDto dto)
         {
@@ -57,25 +59,6 @@ namespace InventoryService.Api.Controllers
             {
                 var createdInventoryItem = await _inventoryService.CreateInventoryItemAsync(dto);
                 return CreatedAtAction(nameof(GetInventoryItemById), new { id = createdInventoryItem.Id }, createdInventoryItem);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpPut("{id:guid}")]
-        [SwaggerOperation(Summary = "Update inventory item")]
-        public async Task<IActionResult> UpdateInventoryItem(Guid id, [FromBody] UpdateInventoryItemDto dto)
-        {
-            try
-            {
-                var updatedInventoryItem = await _inventoryService.UpdateInventoryItemAsync(id, dto);
-                if (updatedInventoryItem == null)
-                {
-                    return NotFound();
-                }
-                return Ok(updatedInventoryItem);
             }
             catch (Exception ex)
             {
@@ -105,6 +88,55 @@ namespace InventoryService.Api.Controllers
                 return NotFound();
             }
             return NoContent();
+        }
+
+        [HttpPost("reserve")]
+        [SwaggerOperation(Summary = "Reserve stock")]
+        public async Task<IActionResult> ReserveStock([FromBody] ChangeInventoryQuantityDto dto)
+        {
+            var result = await _inventoryService.ReserveInventoryAsync(dto);
+
+            return result switch
+            {
+                ReserveInventoryResult.Success => Ok(),
+                ReserveInventoryResult.InventoryItemNotFound => NotFound(new { message = "Inventory item not found." }),
+                ReserveInventoryResult.InvalidQuantity => BadRequest(new { message = "Quantity must be greater than zero." }),
+                ReserveInventoryResult.InsufficientAvailableQuantity => Conflict(new { message = "Not enough available stock." }),
+                _ => StatusCode(500, new { message = "An unexpected error occurred while reserving stock." })
+            };
+        }
+
+        [HttpPost("release")]
+        [SwaggerOperation(Summary = "Release reserved stock")]
+        public async Task<IActionResult> ReleaseStock([FromBody] ChangeInventoryQuantityDto dto)
+        {
+            var result = await _inventoryService.ReleaseInventoryAsync(dto);
+
+            return result switch
+            {
+                ReleaseInventoryResult.Success => Ok(),
+                ReleaseInventoryResult.InventoryItemNotFound => NotFound(new { message = "Inventory item not found." }),
+                ReleaseInventoryResult.InvalidQuantity => BadRequest(new { message = "Quantity must be greater than zero." }),
+                ReleaseInventoryResult.InsufficientReservedQuantity => Conflict(new { message = "Not enough reserved stock to release." }),
+                _ => StatusCode(500, new { message = "An unexpected error occurred while releasing stock." })
+            };
+        }
+
+        [HttpPost("confirm")]
+        [SwaggerOperation(Summary = "Confirm stock deduction")]
+        public async Task<IActionResult> ConfirmStock([FromBody] ChangeInventoryQuantityDto dto)
+        {
+            var result = await _inventoryService.ConfirmDeductionAsync(dto);
+
+            return result switch
+            {
+                ConfirmDeductionResult.Success => Ok(),
+                ConfirmDeductionResult.InventoryItemNotFound => NotFound(new { message = "Inventory item not found." }),
+                ConfirmDeductionResult.InvalidQuantity => BadRequest(new { message = "Quantity must be greater than zero." }),
+                ConfirmDeductionResult.InsufficientReservedQuantity => Conflict(new { message = "Not enough reserved stock to confirm deduction." }),
+                _ => StatusCode(500, new { message = "An unexpected error occurred while confirming stock deduction." })
+            };
+
         }
     }
 }

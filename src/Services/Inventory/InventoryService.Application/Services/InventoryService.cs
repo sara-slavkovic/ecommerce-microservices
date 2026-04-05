@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using InventoryService.Application.DTOs;
+using InventoryService.Application.Enums;
 using InventoryService.Application.Interfaces;
+using InventoryService.Application.Validators;
 using InventoryService.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -13,13 +15,13 @@ namespace InventoryService.Application.Services
     {
         private readonly IInventoryRepository _inventoryRepository;
         private readonly IValidator<CreateInventoryItemDto> _createValidator;
-        private readonly IValidator<UpdateInventoryItemDto> _updateValidator;
+        private readonly IValidator<ChangeInventoryQuantityDto> _quantityChangeValidator;
 
-        public InventoryService(IInventoryRepository inventoryRepository, IValidator<CreateInventoryItemDto> createValidator, IValidator<UpdateInventoryItemDto> updateValidator)
+        public InventoryService(IInventoryRepository inventoryRepository, IValidator<CreateInventoryItemDto> createValidator, IValidator<ChangeInventoryQuantityDto> quantityChangeValidator)
         {
             _inventoryRepository = inventoryRepository;
             _createValidator = createValidator;
-            _updateValidator = updateValidator;
+            _quantityChangeValidator = quantityChangeValidator;
         }
 
         public async Task<IEnumerable<InventoryItemDto>> GetAllInventoryItemsAsync()
@@ -63,35 +65,12 @@ namespace InventoryService.Application.Services
                 ProductId = dto.ProductId,
                 AvailableQuantity = dto.AvailableQuantity,
                 ReservedQuantity = 0,
-                LastUpdatedAt = DateTime.UtcNow
+                LastUpdatedAt = DateTime.Now
             };
 
             var createdInventoryItem = await _inventoryRepository.AddInventoryItemAsync(inventoryItem);
 
             return MapToDto(createdInventoryItem);
-        }
-
-        public async Task<InventoryItemDto?> UpdateInventoryItemAsync(Guid id, UpdateInventoryItemDto dto)
-        {
-            var validationResult = await _updateValidator.ValidateAsync(dto);
-            if (!validationResult.IsValid)
-            {
-                throw new ValidationException(validationResult.Errors);
-            }
-
-            var existingInventoryItem = await _inventoryRepository.GetInventoryItemByIdAsync(id);
-            if (existingInventoryItem == null)
-            {
-                return null;
-            }
-
-            existingInventoryItem.AvailableQuantity = dto.AvailableQuantity;
-            existingInventoryItem.ReservedQuantity = dto.ReservedQuantity;
-            existingInventoryItem.LastUpdatedAt = DateTime.UtcNow;
-
-            var updatedInventoryItem = await _inventoryRepository.UpdateInventoryItemAsync(existingInventoryItem);
-
-            return updatedInventoryItem == null ? null : MapToDto(updatedInventoryItem);
         }
 
         public async Task<bool> DeleteInventoryItemAsync(Guid id)
@@ -116,6 +95,90 @@ namespace InventoryService.Application.Services
 
             await _inventoryRepository.DeleteInventoryItemByProductIdAsync(inventoryItem.ProductId);
             return true;
+        }
+
+        public async Task<ReserveInventoryResult> ReserveInventoryAsync(ChangeInventoryQuantityDto dto)
+        {
+            var validationResult = await _quantityChangeValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                return ReserveInventoryResult.InvalidQuantity;
+            }
+
+            var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
+            if (inventoryItem == null)
+            {
+                return ReserveInventoryResult.InventoryItemNotFound;
+            }
+
+            if (inventoryItem.AvailableQuantity < dto.Quantity)
+            {
+                return ReserveInventoryResult.InsufficientAvailableQuantity;
+            }
+
+            inventoryItem.AvailableQuantity -= dto.Quantity;
+            inventoryItem.ReservedQuantity += dto.Quantity;
+            inventoryItem.LastUpdatedAt = DateTime.Now;
+
+            await _inventoryRepository.UpdateInventoryItemAsync(inventoryItem);
+
+            return ReserveInventoryResult.Success;
+        }
+
+        //when order or payment fails or order gets cancelled
+        public async Task<ReleaseInventoryResult> ReleaseInventoryAsync(ChangeInventoryQuantityDto dto)
+        {
+            var validationResult = await _quantityChangeValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                return ReleaseInventoryResult.InvalidQuantity;
+            }
+
+            var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
+            if (inventoryItem == null)
+            {
+                return ReleaseInventoryResult.InventoryItemNotFound;
+            }
+
+            if (dto.Quantity > inventoryItem.ReservedQuantity)
+            {
+                return ReleaseInventoryResult.InsufficientReservedQuantity;
+            }
+
+            inventoryItem.ReservedQuantity -= dto.Quantity;
+            inventoryItem.AvailableQuantity += dto.Quantity;
+            inventoryItem.LastUpdatedAt = DateTime.Now;
+
+            await _inventoryRepository.UpdateInventoryItemAsync(inventoryItem);
+
+            return ReleaseInventoryResult.Success;
+        }
+
+        public async Task<ConfirmDeductionResult> ConfirmDeductionAsync(ChangeInventoryQuantityDto dto)
+        {
+            var validationResult = await _quantityChangeValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                return ConfirmDeductionResult.InvalidQuantity;
+            }
+
+            var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
+            if (inventoryItem == null)
+            {
+                return ConfirmDeductionResult.InventoryItemNotFound;
+            }
+
+            if (inventoryItem.ReservedQuantity < dto.Quantity)
+            {
+                return ConfirmDeductionResult.InsufficientReservedQuantity;
+            }
+
+            inventoryItem.ReservedQuantity -= dto.Quantity;
+            inventoryItem.LastUpdatedAt = DateTime.Now;
+
+            await _inventoryRepository.UpdateInventoryItemAsync(inventoryItem);
+
+            return ConfirmDeductionResult.Success;
         }
 
         private static InventoryItemDto MapToDto(InventoryItem inventoryItem)
