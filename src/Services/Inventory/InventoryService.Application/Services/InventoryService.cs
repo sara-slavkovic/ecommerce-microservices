@@ -183,6 +183,12 @@ namespace InventoryService.Application.Services
 
         public async Task<bool> RestockInventoryAsync(ChangeInventoryQuantityDto dto)
         {
+            var validationResult = await _quantityChangeValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                return false;
+            }
+
             var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
             if (inventoryItem == null)
             {
