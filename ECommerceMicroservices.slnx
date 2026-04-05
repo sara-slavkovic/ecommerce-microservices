@@ -1,4 +1,10 @@
 <Solution>
+  <Folder Name="/Cart/">
+    <Project Path="src/Services/Cart/CartService.Api/CartService.Api.csproj" Id="ec9b999f-9016-4735-9d8f-f17303bb1bd2" />
+    <Project Path="src/Services/Cart/CartService.Application/CartService.Application.csproj" Id="5c056949-1488-482d-b618-eb99e28b6e5a" />
+    <Project Path="src/Services/Cart/CartService.Domain/CartService.Domain.csproj" Id="46b076e4-cb03-4ba7-b971-1851a4145894" />
+    <Project Path="src/Services/Cart/CartService.Infrastructure/CartService.Infrastructure.csproj" Id="c1de5acc-e91f-403b-84a0-dd9c53928c5a" />
+  </Folder>
   <Folder Name="/Catalog/">
     <Project Path="src/Services/Catalog/CatalogService.Api/CatalogService.Api.csproj" />
     <Project Path="src/Services/Catalog/CatalogService.Application/CatalogService.Application.csproj" />
