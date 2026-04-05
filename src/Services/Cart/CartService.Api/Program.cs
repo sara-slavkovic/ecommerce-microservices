@@ -1,9 +1,15 @@
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<CartService.Infrastructure.Persistence.CartDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("CartDatabase")));
 
 var app = builder.Build();
 
