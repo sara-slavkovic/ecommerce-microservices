@@ -136,7 +136,20 @@ namespace InventoryService.Api.Controllers
                 ConfirmDeductionResult.InsufficientReservedQuantity => Conflict(new { message = "Not enough reserved stock to confirm deduction." }),
                 _ => StatusCode(500, new { message = "An unexpected error occurred while confirming stock deduction." })
             };
+        }
 
+        [HttpPost("restock")]
+        [SwaggerOperation(Summary = "Restock inventory")]
+        public async Task<IActionResult> RestockInventory([FromBody] ChangeInventoryQuantityDto dto)
+        {
+            var result = await _inventoryService.RestockInventoryAsync(dto);
+
+            if (!result)
+            {
+                return NotFound(new { message = "Inventory item not found." });
+            }
+
+            return Ok(new { message = "Stock successfully added." });
         }
     }
 }

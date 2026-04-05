@@ -181,6 +181,22 @@ namespace InventoryService.Application.Services
             return ConfirmDeductionResult.Success;
         }
 
+        public async Task<bool> RestockInventoryAsync(ChangeInventoryQuantityDto dto)
+        {
+            var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
+            if (inventoryItem == null)
+            {
+                return false;
+            }
+
+            inventoryItem.AvailableQuantity += dto.Quantity;
+            inventoryItem.LastUpdatedAt = DateTime.Now;
+
+            await _inventoryRepository.UpdateInventoryItemAsync(inventoryItem);
+
+            return true;
+        }
+
         private static InventoryItemDto MapToDto(InventoryItem inventoryItem)
         {
             return new InventoryItemDto
