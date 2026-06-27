@@ -141,7 +141,15 @@ namespace CatalogService.Application.Services
                 return false;
             }
 
-            await _inventoryServiceClient.DeleteInventoryItemByProductIdAsync(id);
+            try
+            {
+                await _inventoryServiceClient.DeleteInventoryItemByProductIdAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Cannot delete product {id} because inventory cleanup failed: {ex.Message}", ex);
+            }
+            
             await _productRepository.DeleteProductAsync(id);
             return true;
         }
