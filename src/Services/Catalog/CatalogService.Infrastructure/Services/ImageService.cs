@@ -1,4 +1,5 @@
 ﻿using CatalogService.Application.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,6 +9,13 @@ namespace CatalogService.Infrastructure.Services
 {
     public class ImageService : IImageService
     {
+        private readonly IWebHostEnvironment _env;
+
+        public ImageService(IWebHostEnvironment env)
+        {
+            _env = env;
+        }   
+
         public async Task<string> UploadProductImageAsync(Stream fileStream, string originalFileName, string productName)
         {
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
@@ -16,7 +24,7 @@ namespace CatalogService.Infrastructure.Services
             if (!allowedExtensions.Contains(extension))
                 throw new ArgumentException("Only .jpg .jpeg .png and .webp files are allowed.");
 
-            var imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+            var imagesFolder = Path.Combine(_env.WebRootPath, "images");
 
             if (!Directory.Exists(imagesFolder))
                 Directory.CreateDirectory(imagesFolder);
