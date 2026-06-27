@@ -36,18 +36,8 @@ namespace CatalogService.Infrastructure.Repositories
 
         public async Task<Category?> UpdateCategoryAsync(Category category)
         {
-            var existingCategory = await _context.Categories.FindAsync(category.Id);
-
-            if (existingCategory == null)
-            {
-                return null;
-            }
-
-            existingCategory.Name = category.Name;
-            existingCategory.ParentCategoryId = category.ParentCategoryId;
-
             await _context.SaveChangesAsync();
-            return existingCategory;
+            return category;
         }
 
         public async Task DeleteCategoryAsync(Guid id)

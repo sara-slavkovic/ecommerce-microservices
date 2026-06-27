@@ -46,24 +46,8 @@ namespace CatalogService.Infrastructure.Repositories
 
         public async Task<Product?> UpdateProductAsync(Product product)
         {
-            var existingProduct = await _context.Products.FindAsync(product.Id);
-
-            if(existingProduct == null)
-            {
-                return null;
-            }   
-
-            existingProduct.Sku = product.Sku;
-            existingProduct.Name = product.Name;
-            existingProduct.Brand = product.Brand;
-            existingProduct.Description = product.Description;
-            existingProduct.Price = product.Price;
-            existingProduct.ImageUrl = product.ImageUrl;
-            existingProduct.IsActive = product.IsActive;
-            existingProduct.CategoryId = product.CategoryId;
-
             await _context.SaveChangesAsync();
-            return existingProduct;
+            return product;
         }
 
         public async Task DeleteProductAsync(Guid id)
