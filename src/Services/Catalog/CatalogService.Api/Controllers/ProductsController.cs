@@ -85,12 +85,19 @@ namespace CatalogService.Api.Controllers
         [SwaggerOperation(Summary = "Delete product")]
         public async Task<IActionResult> DeleteProduct(Guid id)
         {
-            var deleted = await _productService.DeleteProductAsync(id);
+            try
+            {
+                var deleted = await _productService.DeleteProductAsync(id);
 
-            if (!deleted)
-                return NotFound();
+                if (!deleted)
+                    return NotFound();
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpPost("upload-image")]

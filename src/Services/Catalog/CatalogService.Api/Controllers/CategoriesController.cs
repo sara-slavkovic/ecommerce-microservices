@@ -43,22 +43,36 @@ namespace CatalogService.Api.Controllers
         [SwaggerOperation(Summary = "Create category")]
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto dto)
         {
-            var createdCategory = await _categoryService.CreateCategoryAsync(dto);
-            return CreatedAtAction(nameof(GetCategoryById), new { id = createdCategory.Id }, createdCategory);
+            try
+            {
+                var createdCategory = await _categoryService.CreateCategoryAsync(dto);
+                return CreatedAtAction(nameof(GetCategoryById), new { id = createdCategory.Id }, createdCategory);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id:guid}")]
         [SwaggerOperation("Update category")]
         public async Task<IActionResult> UpdateCategory(Guid id, [FromBody] UpdateCategoryDto dto)
         {
-            var updatedCategory = await _categoryService.UpdateCategoryAsync(id, dto);
-
-            if (updatedCategory == null)
+            try
             {
-                return NotFound();
-            }
+                var updatedCategory = await _categoryService.UpdateCategoryAsync(id, dto);
 
-            return Ok(updatedCategory);
+                if (updatedCategory == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(updatedCategory);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id:guid}")]
