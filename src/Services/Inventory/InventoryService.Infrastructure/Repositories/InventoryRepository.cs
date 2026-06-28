@@ -46,19 +46,8 @@ namespace InventoryService.Infrastructure.Repositories
 
         public async Task<InventoryItem?> UpdateInventoryItemAsync(InventoryItem inventoryItem)
         {
-            var existingInventoryItem = await _context.InventoryItems.FindAsync(inventoryItem.Id);
-
-            if (existingInventoryItem == null)
-            {
-                return null;
-            }
-
-            existingInventoryItem.AvailableQuantity = inventoryItem.AvailableQuantity;
-            existingInventoryItem.ReservedQuantity = inventoryItem.ReservedQuantity;
-            existingInventoryItem.LastUpdatedAt = inventoryItem.LastUpdatedAt;
-
             await _context.SaveChangesAsync();
-            return existingInventoryItem;
+            return inventoryItem;
         }
 
         public async Task DeleteInventoryItemAsync(Guid id)
