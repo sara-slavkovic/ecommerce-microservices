@@ -1,4 +1,5 @@
-﻿using InventoryService.Application.DTOs;
+﻿using InventoryService.Api.Filters;
+using InventoryService.Application.DTOs;
 using InventoryService.Application.Enums;
 using InventoryService.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -52,6 +53,7 @@ namespace InventoryService.Api.Controllers
 
         // This endpoint should only be called by CatalogService, so that inventory item cannot be created without a valid product
         [HttpPost("internal")]
+        [InternalApiKey]
         [SwaggerOperation(Summary = "Create inventory item")]
         public async Task<IActionResult> CreateInventoryItem([FromBody] CreateInventoryItemDto dto)
         {
