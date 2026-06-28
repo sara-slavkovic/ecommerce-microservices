@@ -181,18 +181,18 @@ namespace InventoryService.Application.Services
             return ConfirmDeductionResult.Success;
         }
 
-        public async Task<bool> RestockInventoryAsync(ChangeInventoryQuantityDto dto)
+        public async Task<RestockInventoryResult> RestockInventoryAsync(ChangeInventoryQuantityDto dto)
         {
             var validationResult = await _quantityChangeValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
             {
-                return false;
+                return RestockInventoryResult.InvalidQuantity;
             }
 
             var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
             if (inventoryItem == null)
             {
-                return false;
+                return RestockInventoryResult.InventoryItemNotFound;
             }
 
             inventoryItem.AvailableQuantity += dto.Quantity;
@@ -200,7 +200,7 @@ namespace InventoryService.Application.Services
 
             await _inventoryRepository.UpdateInventoryItemAsync(inventoryItem);
 
-            return true;
+            return RestockInventoryResult.Success;
         }
 
         private static InventoryItemDto MapToDto(InventoryItem inventoryItem)

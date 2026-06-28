@@ -146,12 +146,13 @@ namespace InventoryService.Api.Controllers
         {
             var result = await _inventoryService.RestockInventoryAsync(dto);
 
-            if (!result)
+            return result switch
             {
-                return NotFound(new { message = "Inventory item not found." });
-            }
-
-            return Ok(new { message = "Stock successfully added." });
+                RestockInventoryResult.Success => Ok(),
+                RestockInventoryResult.InventoryItemNotFound => NotFound(new { message = "Inventory item not found." }),
+                RestockInventoryResult.InvalidQuantity => BadRequest(new { message = "Quantity must be greater than zero." }),
+                _ => StatusCode(500, new { message = "An unexpected error occurred while restocking inventory." })
+            };
         }
     }
 }

@@ -18,6 +18,6 @@ namespace InventoryService.Application.Interfaces
         Task<ReserveInventoryResult> ReserveInventoryAsync(ChangeInventoryQuantityDto dto);
         Task<ReleaseInventoryResult> ReleaseInventoryAsync(ChangeInventoryQuantityDto dto);
         Task<ConfirmDeductionResult> ConfirmDeductionAsync(ChangeInventoryQuantityDto dto);
-        Task<bool> RestockInventoryAsync(ChangeInventoryQuantityDto dto);
+        Task<RestockInventoryResult> RestockInventoryAsync(ChangeInventoryQuantityDto dto);
     }
 }
