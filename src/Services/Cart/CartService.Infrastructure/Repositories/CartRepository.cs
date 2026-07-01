@@ -51,40 +51,96 @@ namespace CartService.Infrastructure.Repositories
             return cart;
         }
 
-        public async Task InsertCartAsync(Cart cart)
+        public async Task InsertCartWithItemAsync(Cart cart, CartItem item)
         {
             var connection = await GetOpenConnectionAsync();
-            await connection.ExecuteAsync(
-                "INSERT INTO Carts (Id, UserId, TotalAmount, CreatedAt, UpdatedAt) VALUES (@Id, @UserId, @TotalAmount, @CreatedAt, @UpdatedAt)", cart);
+            using var transaction = connection.BeginTransaction();
+            try
+            {
+                await connection.ExecuteAsync(
+                    "INSERT INTO Carts (Id, UserId, TotalAmount, CreatedAt, UpdatedAt) VALUES (@Id, @UserId, @TotalAmount, @CreatedAt, @UpdatedAt)",
+                    cart, transaction);
+
+                item.Id = await connection.ExecuteScalarAsync<Guid>(
+                    "INSERT INTO CartItems (CartId, ProductId, Quantity, PricePerUnit) OUTPUT INSERTED.Id VALUES (@CartId, @ProductId, @Quantity, @PricePerUnit)",
+                    item, transaction);
+
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
 
-        public async Task UpdateCartAsync(Cart cart)
+        public async Task InsertCartItemAsync(Cart cart, CartItem item)
         {
             var connection = await GetOpenConnectionAsync();
-            await connection.ExecuteAsync(
-                "UPDATE Carts SET TotalAmount = @TotalAmount, UpdatedAt = @UpdatedAt WHERE Id = @Id", cart);
+            using var transaction = connection.BeginTransaction();
+            try
+            {
+                item.Id = await connection.ExecuteScalarAsync<Guid>(
+                    "INSERT INTO CartItems (CartId, ProductId, Quantity, PricePerUnit) OUTPUT INSERTED.Id VALUES (@CartId, @ProductId, @Quantity, @PricePerUnit)",
+                    item, transaction);
+
+                await connection.ExecuteAsync(
+                    "UPDATE Carts SET TotalAmount = @TotalAmount, UpdatedAt = @UpdatedAt WHERE Id = @Id",
+                    cart, transaction);
+
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
 
-        public async Task<Guid> InsertCartItemAsync(CartItem item)
+        public async Task UpdateCartAndItemAsync(Cart cart, CartItem item)
         {
             var connection = await GetOpenConnectionAsync();
-            var id = await connection.ExecuteScalarAsync<Guid>(
-                "INSERT INTO CartItems (CartId, ProductId, Quantity, PricePerUnit) OUTPUT INSERTED.Id VALUES (@CartId, @ProductId, @Quantity, @PricePerUnit)", item);
-            return id;
+            using var transaction = connection.BeginTransaction();
+            try
+            {
+                await connection.ExecuteAsync(
+                    "UPDATE Carts SET TotalAmount = @TotalAmount, UpdatedAt = @UpdatedAt WHERE Id = @Id",
+                    cart, transaction);
+
+                await connection.ExecuteAsync(
+                    "UPDATE CartItems SET Quantity = @Quantity, PricePerUnit = @PricePerUnit WHERE Id = @Id",
+                    item, transaction);
+
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
 
-        public async Task UpdateCartItemAsync(CartItem item)
+        public async Task DeleteCartItemAndUpdateCartAsync(Guid cartItemId, Cart cart)
         {
             var connection = await GetOpenConnectionAsync();
-            await connection.ExecuteAsync(
-                "UPDATE CartItems SET Quantity = @Quantity WHERE Id = @Id", item);
-        }
+            using var transaction = connection.BeginTransaction();
+            try
+            {
+                await connection.ExecuteAsync(
+                    "DELETE FROM CartItems WHERE Id = @Id",
+                    new { Id = cartItemId }, transaction);
 
-        public async Task DeleteCartItemAsync(Guid cartItemId)
-        {
-            var connection = await GetOpenConnectionAsync();
-            await connection.ExecuteAsync(
-                "DELETE FROM CartItems WHERE Id = @Id", new { Id = cartItemId });
+                await connection.ExecuteAsync(
+                    "UPDATE Carts SET TotalAmount = @TotalAmount, UpdatedAt = @UpdatedAt WHERE Id = @Id",
+                    cart, transaction);
+
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
 
         public async Task DeleteCartAsync(Guid cartId)

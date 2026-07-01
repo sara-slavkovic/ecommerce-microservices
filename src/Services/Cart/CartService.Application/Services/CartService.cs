@@ -85,19 +85,17 @@ namespace CartService.Application.Services
 
             if (isNewCart)
             {
-                await _cartRepository.InsertCartAsync(cart);
                 var newItem = cart.CartItems.First();
-                newItem.Id = await _cartRepository.InsertCartItemAsync(newItem);
+                await _cartRepository.InsertCartWithItemAsync(cart, newItem);
             }
             else
             {
-                await _cartRepository.UpdateCartAsync(cart);
                 if (existingItem != null)
-                    await _cartRepository.UpdateCartItemAsync(existingItem);
+                    await _cartRepository.UpdateCartAndItemAsync(cart, existingItem);
                 else
                 {
                     var newItem = cart.CartItems.Last();
-                    newItem.Id = await _cartRepository.InsertCartItemAsync(newItem);
+                    await _cartRepository.InsertCartItemAsync(cart, newItem);
                 }
             }
 
@@ -127,8 +125,7 @@ namespace CartService.Application.Services
             cart.TotalAmount = cart.CartItems.Sum(ci => ci.Quantity * ci.PricePerUnit);
             cart.UpdatedAt = DateTime.Now;
 
-            await _cartRepository.UpdateCartAsync(cart);
-            await _cartRepository.UpdateCartItemAsync(cartItem);
+            await _cartRepository.UpdateCartAndItemAsync(cart, cartItem);
 
             return await MapToCartDtoAsync(cart);
         }
@@ -141,13 +138,11 @@ namespace CartService.Application.Services
             var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
             if (cartItem == null) return false;
 
-            await _cartRepository.DeleteCartItemAsync(cartItem.Id);
-
             cart.CartItems.Remove(cartItem);
             cart.TotalAmount = cart.CartItems.Sum(ci => ci.Quantity * ci.PricePerUnit);
             cart.UpdatedAt = DateTime.Now;
 
-            await _cartRepository.UpdateCartAsync(cart);
+            await _cartRepository.DeleteCartItemAndUpdateCartAsync(cartItem.Id, cart);
 
             return true;
         }
