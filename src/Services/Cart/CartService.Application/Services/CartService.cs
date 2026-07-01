@@ -73,7 +73,6 @@ namespace CartService.Application.Services
 
                 cart.CartItems.Add(new CartItem
                 {
-                    Id = Guid.CreateVersion7(),
                     CartId = cart.Id,
                     ProductId = dto.ProductId,
                     Quantity = dto.Quantity,
@@ -87,7 +86,8 @@ namespace CartService.Application.Services
             if (isNewCart)
             {
                 await _cartRepository.InsertCartAsync(cart);
-                await _cartRepository.InsertCartItemAsync(cart.CartItems.First());
+                var newItem = cart.CartItems.First();
+                newItem.Id = await _cartRepository.InsertCartItemAsync(newItem);
             }
             else
             {
@@ -95,7 +95,10 @@ namespace CartService.Application.Services
                 if (existingItem != null)
                     await _cartRepository.UpdateCartItemAsync(existingItem);
                 else
-                    await _cartRepository.InsertCartItemAsync(cart.CartItems.Last());
+                {
+                    var newItem = cart.CartItems.Last();
+                    newItem.Id = await _cartRepository.InsertCartItemAsync(newItem);
+                }
             }
 
             return await MapToCartDtoAsync(cart);

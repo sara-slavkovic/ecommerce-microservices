@@ -15,6 +15,9 @@ namespace CartService.Infrastructure.Persistence.Configurations
 
             builder.HasKey(ci => ci.Id);
 
+            builder.Property(ci => ci.Id)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
             builder.Property(ci => ci.ProductId)
                 .IsRequired();
 

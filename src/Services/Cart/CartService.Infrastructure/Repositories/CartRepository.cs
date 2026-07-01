@@ -65,11 +65,12 @@ namespace CartService.Infrastructure.Repositories
                 "UPDATE Carts SET TotalAmount = @TotalAmount, UpdatedAt = @UpdatedAt WHERE Id = @Id", cart);
         }
 
-        public async Task InsertCartItemAsync(CartItem item)
+        public async Task<Guid> InsertCartItemAsync(CartItem item)
         {
             var connection = await GetOpenConnectionAsync();
-            await connection.ExecuteAsync(
-                "INSERT INTO CartItems (Id, CartId, ProductId, Quantity, PricePerUnit) VALUES (@Id, @CartId, @ProductId, @Quantity, @PricePerUnit)", item);
+            var id = await connection.ExecuteScalarAsync<Guid>(
+                "INSERT INTO CartItems (CartId, ProductId, Quantity, PricePerUnit) OUTPUT INSERTED.Id VALUES (@CartId, @ProductId, @Quantity, @PricePerUnit)", item);
+            return id;
         }
 
         public async Task UpdateCartItemAsync(CartItem item)

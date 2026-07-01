@@ -10,7 +10,7 @@ namespace CartService.Application.Interfaces
         Task<Cart?> GetCartWithItemsByUserIdAsync(Guid userId);
         Task InsertCartAsync(Cart cart);
         Task UpdateCartAsync(Cart cart);
-        Task InsertCartItemAsync(CartItem item);
+        Task<Guid> InsertCartItemAsync(CartItem item);
         Task UpdateCartItemAsync(CartItem item);
         Task DeleteCartItemAsync(Guid cartItemId);
         Task DeleteCartAsync(Guid cartId);
