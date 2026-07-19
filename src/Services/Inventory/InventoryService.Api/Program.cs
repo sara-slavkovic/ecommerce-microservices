@@ -20,6 +20,10 @@ builder.Services.AddScoped<InventoryService.Application.Interfaces.IInventorySer
 
 builder.Services.AddValidatorsFromAssemblyContaining<InventoryService.Application.Validators.CreateInventoryItemDtoValidator>(ServiceLifetime.Transient);
 
+builder.Services.AddExceptionHandler<SharedKernel.Web.ExceptionHandlers.ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<SharedKernel.Web.ExceptionHandlers.GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -28,6 +32,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 

@@ -1,9 +1,9 @@
 ﻿using FluentValidation;
 using InventoryService.Application.DTOs;
-using InventoryService.Application.Enums;
 using InventoryService.Application.Interfaces;
 using InventoryService.Application.Validators;
 using InventoryService.Domain.Entities;
+using SharedKernel.Domain.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +56,7 @@ namespace InventoryService.Application.Services
             var exists = await _inventoryRepository.ExistsByProductIdAsync(dto.ProductId);
             if (exists)
             {
-                throw new InvalidOperationException("Inventory item for this product already exists.");
+                throw new ConflictException("Inventory item for this product already exists.");
             }
 
             var inventoryItem = new InventoryItem
@@ -68,139 +68,140 @@ namespace InventoryService.Application.Services
                 LastUpdatedAt = DateTime.Now
             };
 
-            var createdInventoryItem = await _inventoryRepository.AddInventoryItemAsync(inventoryItem);
+            await _inventoryRepository.AddInventoryItemAsync(inventoryItem);
+            await _inventoryRepository.SaveChangesAsync();
 
-            return MapToDto(createdInventoryItem);
+            return MapToDto(inventoryItem);
         }
 
-        public async Task<bool> DeleteInventoryItemAsync(Guid id)
+        public async Task DeleteInventoryItemAsync(Guid id)
         {
             var inventoryItem = await _inventoryRepository.GetInventoryItemByIdAsync(id);
             if (inventoryItem == null)
             {
-                return false;
+                throw new NotFoundException("Inventory item not found.");
             }
 
-            await _inventoryRepository.DeleteInventoryItemAsync(id);
-            return true;
+            _inventoryRepository.DeleteInventoryItem(inventoryItem);
+            await _inventoryRepository.SaveChangesAsync();
         }
 
-        public async Task<bool> DeleteInventoryItemByProductIdAsync(Guid productId)
+        public async Task DeleteInventoryItemByProductIdAsync(Guid productId)
         {
             var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(productId);
             if (inventoryItem == null)
             {
-                return false;
+                throw new NotFoundException("Inventory item not found.");
             }
 
-            await _inventoryRepository.DeleteInventoryItemByProductIdAsync(inventoryItem.ProductId);
-            return true;
+            _inventoryRepository.DeleteInventoryItem(inventoryItem);
+            await _inventoryRepository.SaveChangesAsync();
         }
 
-        public async Task<ReserveInventoryResult> ReserveInventoryAsync(ChangeInventoryQuantityDto dto)
+        public async Task<InventoryItemDto> ReserveInventoryAsync(ChangeInventoryQuantityDto dto)
         {
             var validationResult = await _quantityChangeValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
             {
-                return ReserveInventoryResult.InvalidQuantity;
+                throw new ValidationException(validationResult.Errors);
             }
 
             var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
             if (inventoryItem == null)
             {
-                return ReserveInventoryResult.InventoryItemNotFound;
+                throw new NotFoundException("Inventory item not found.");
             }
 
             if (inventoryItem.AvailableQuantity < dto.Quantity)
             {
-                return ReserveInventoryResult.InsufficientAvailableQuantity;
+                throw new ConflictException("Not enough available stock.");
             }
 
             inventoryItem.AvailableQuantity -= dto.Quantity;
             inventoryItem.ReservedQuantity += dto.Quantity;
             inventoryItem.LastUpdatedAt = DateTime.Now;
 
-            await _inventoryRepository.UpdateInventoryItemAsync(inventoryItem);
+            await _inventoryRepository.SaveChangesAsync();
 
-            return ReserveInventoryResult.Success;
+            return MapToDto(inventoryItem);
         }
 
         //when order or payment fails or order gets cancelled
-        public async Task<ReleaseInventoryResult> ReleaseInventoryAsync(ChangeInventoryQuantityDto dto)
+        public async Task<InventoryItemDto> ReleaseInventoryAsync(ChangeInventoryQuantityDto dto)
         {
             var validationResult = await _quantityChangeValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
             {
-                return ReleaseInventoryResult.InvalidQuantity;
+                throw new ValidationException(validationResult.Errors);
             }
 
             var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
             if (inventoryItem == null)
             {
-                return ReleaseInventoryResult.InventoryItemNotFound;
+                throw new NotFoundException("Inventory item not found.");
             }
 
             if (dto.Quantity > inventoryItem.ReservedQuantity)
             {
-                return ReleaseInventoryResult.InsufficientReservedQuantity;
+                throw new ConflictException("Not enough reserved stock to release.");
             }
 
             inventoryItem.ReservedQuantity -= dto.Quantity;
             inventoryItem.AvailableQuantity += dto.Quantity;
             inventoryItem.LastUpdatedAt = DateTime.Now;
 
-            await _inventoryRepository.UpdateInventoryItemAsync(inventoryItem);
+            await _inventoryRepository.SaveChangesAsync();
 
-            return ReleaseInventoryResult.Success;
+            return MapToDto(inventoryItem);
         }
 
-        public async Task<ConfirmDeductionResult> ConfirmDeductionAsync(ChangeInventoryQuantityDto dto)
+        public async Task<InventoryItemDto> ConfirmDeductionAsync(ChangeInventoryQuantityDto dto)
         {
             var validationResult = await _quantityChangeValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
             {
-                return ConfirmDeductionResult.InvalidQuantity;
+                throw new ValidationException(validationResult.Errors);
             }
 
             var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
             if (inventoryItem == null)
             {
-                return ConfirmDeductionResult.InventoryItemNotFound;
+                throw new NotFoundException("Inventory item not found.");
             }
 
             if (inventoryItem.ReservedQuantity < dto.Quantity)
             {
-                return ConfirmDeductionResult.InsufficientReservedQuantity;
+                throw new ConflictException("Not enough reserved stock to confirm deduction.");
             }
 
             inventoryItem.ReservedQuantity -= dto.Quantity;
             inventoryItem.LastUpdatedAt = DateTime.Now;
 
-            await _inventoryRepository.UpdateInventoryItemAsync(inventoryItem);
+            await _inventoryRepository.SaveChangesAsync();
 
-            return ConfirmDeductionResult.Success;
+            return MapToDto(inventoryItem);
         }
 
-        public async Task<RestockInventoryResult> RestockInventoryAsync(ChangeInventoryQuantityDto dto)
+        public async Task<InventoryItemDto> RestockInventoryAsync(ChangeInventoryQuantityDto dto)
         {
             var validationResult = await _quantityChangeValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
             {
-                return RestockInventoryResult.InvalidQuantity;
+                throw new ValidationException(validationResult.Errors);
             }
 
             var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
             if (inventoryItem == null)
             {
-                return RestockInventoryResult.InventoryItemNotFound;
+                throw new NotFoundException("Inventory item not found.");
             }
 
             inventoryItem.AvailableQuantity += dto.Quantity;
             inventoryItem.LastUpdatedAt = DateTime.Now;
 
-            await _inventoryRepository.UpdateInventoryItemAsync(inventoryItem);
+            await _inventoryRepository.SaveChangesAsync();
 
-            return RestockInventoryResult.Success;
+            return MapToDto(inventoryItem);
         }
 
         private static InventoryItemDto MapToDto(InventoryItem inventoryItem)

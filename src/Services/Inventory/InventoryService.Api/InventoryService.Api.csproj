@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\SharedKernel\SharedKernel.Web\SharedKernel.Web.csproj" />
     <ProjectReference Include="..\InventoryService.Application\InventoryService.Application.csproj" />
     <ProjectReference Include="..\InventoryService.Infrastructure\InventoryService.Infrastructure.csproj" />
   </ItemGroup>

@@ -1,5 +1,4 @@
 ﻿using InventoryService.Application.DTOs;
-using InventoryService.Application.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,11 +12,11 @@ namespace InventoryService.Application.Interfaces
         Task<InventoryItemDto?> GetInventoryItemByIdAsync(Guid id);
         Task<InventoryItemDto?> GetInventoryItemByProductIdAsync(Guid productId);
         Task<InventoryItemDto> CreateInventoryItemAsync(CreateInventoryItemDto dto);
-        Task<bool> DeleteInventoryItemAsync(Guid id);
-        Task<bool> DeleteInventoryItemByProductIdAsync(Guid productId);
-        Task<ReserveInventoryResult> ReserveInventoryAsync(ChangeInventoryQuantityDto dto);
-        Task<ReleaseInventoryResult> ReleaseInventoryAsync(ChangeInventoryQuantityDto dto);
-        Task<ConfirmDeductionResult> ConfirmDeductionAsync(ChangeInventoryQuantityDto dto);
-        Task<RestockInventoryResult> RestockInventoryAsync(ChangeInventoryQuantityDto dto);
+        Task DeleteInventoryItemAsync(Guid id);
+        Task DeleteInventoryItemByProductIdAsync(Guid productId);
+        Task<InventoryItemDto> ReserveInventoryAsync(ChangeInventoryQuantityDto dto);
+        Task<InventoryItemDto> ReleaseInventoryAsync(ChangeInventoryQuantityDto dto);
+        Task<InventoryItemDto> ConfirmDeductionAsync(ChangeInventoryQuantityDto dto);
+        Task<InventoryItemDto> RestockInventoryAsync(ChangeInventoryQuantityDto dto);
     }
 }

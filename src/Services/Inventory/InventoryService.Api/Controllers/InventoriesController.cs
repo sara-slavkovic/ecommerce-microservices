@@ -1,6 +1,5 @@
 ﻿using InventoryService.Api.Filters;
 using InventoryService.Application.DTOs;
-using InventoryService.Application.Enums;
 using InventoryService.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -57,26 +56,15 @@ namespace InventoryService.Api.Controllers
         [SwaggerOperation(Summary = "Create inventory item")]
         public async Task<IActionResult> CreateInventoryItem([FromBody] CreateInventoryItemDto dto)
         {
-            try
-            {
-                var createdInventoryItem = await _inventoryService.CreateInventoryItemAsync(dto);
-                return CreatedAtAction(nameof(GetInventoryItemById), new { id = createdInventoryItem.Id }, createdInventoryItem);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var createdInventoryItem = await _inventoryService.CreateInventoryItemAsync(dto);
+            return CreatedAtAction(nameof(GetInventoryItemById), new { id = createdInventoryItem.Id }, createdInventoryItem);
         }
 
         [HttpDelete("{id:guid}")]
         [SwaggerOperation(Summary = "Delete inventory item")]
         public async Task<IActionResult> DeleteInventoryItem(Guid id)
         {
-            var deleted = await _inventoryService.DeleteInventoryItemAsync(id);
-            if (!deleted)
-            {
-                return NotFound();
-            }
+            await _inventoryService.DeleteInventoryItemAsync(id);
             return NoContent();
         }
 
@@ -84,11 +72,7 @@ namespace InventoryService.Api.Controllers
         [SwaggerOperation(Summary = "Delete inventory item by product ID")]
         public async Task<IActionResult> DeleteInventoryItemByProductId(Guid productId)
         {
-            var deleted = await _inventoryService.DeleteInventoryItemByProductIdAsync(productId);
-            if (!deleted)
-            {
-                return NotFound();
-            }
+            await _inventoryService.DeleteInventoryItemByProductIdAsync(productId);
             return NoContent();
         }
 
@@ -97,15 +81,7 @@ namespace InventoryService.Api.Controllers
         public async Task<IActionResult> ReserveStock([FromBody] ChangeInventoryQuantityDto dto)
         {
             var result = await _inventoryService.ReserveInventoryAsync(dto);
-
-            return result switch
-            {
-                ReserveInventoryResult.Success => Ok(),
-                ReserveInventoryResult.InventoryItemNotFound => NotFound(new { message = "Inventory item not found." }),
-                ReserveInventoryResult.InvalidQuantity => BadRequest(new { message = "Quantity must be greater than zero." }),
-                ReserveInventoryResult.InsufficientAvailableQuantity => Conflict(new { message = "Not enough available stock." }),
-                _ => StatusCode(500, new { message = "An unexpected error occurred while reserving stock." })
-            };
+            return Ok(result);
         }
 
         [HttpPost("release")]
@@ -113,15 +89,7 @@ namespace InventoryService.Api.Controllers
         public async Task<IActionResult> ReleaseStock([FromBody] ChangeInventoryQuantityDto dto)
         {
             var result = await _inventoryService.ReleaseInventoryAsync(dto);
-
-            return result switch
-            {
-                ReleaseInventoryResult.Success => Ok(),
-                ReleaseInventoryResult.InventoryItemNotFound => NotFound(new { message = "Inventory item not found." }),
-                ReleaseInventoryResult.InvalidQuantity => BadRequest(new { message = "Quantity must be greater than zero." }),
-                ReleaseInventoryResult.InsufficientReservedQuantity => Conflict(new { message = "Not enough reserved stock to release." }),
-                _ => StatusCode(500, new { message = "An unexpected error occurred while releasing stock." })
-            };
+            return Ok(result);
         }
 
         [HttpPost("confirm")]
@@ -129,15 +97,7 @@ namespace InventoryService.Api.Controllers
         public async Task<IActionResult> ConfirmStock([FromBody] ChangeInventoryQuantityDto dto)
         {
             var result = await _inventoryService.ConfirmDeductionAsync(dto);
-
-            return result switch
-            {
-                ConfirmDeductionResult.Success => Ok(),
-                ConfirmDeductionResult.InventoryItemNotFound => NotFound(new { message = "Inventory item not found." }),
-                ConfirmDeductionResult.InvalidQuantity => BadRequest(new { message = "Quantity must be greater than zero." }),
-                ConfirmDeductionResult.InsufficientReservedQuantity => Conflict(new { message = "Not enough reserved stock to confirm deduction." }),
-                _ => StatusCode(500, new { message = "An unexpected error occurred while confirming stock deduction." })
-            };
+            return Ok(result);
         }
 
         [HttpPost("restock")]
@@ -145,14 +105,7 @@ namespace InventoryService.Api.Controllers
         public async Task<IActionResult> RestockInventory([FromBody] ChangeInventoryQuantityDto dto)
         {
             var result = await _inventoryService.RestockInventoryAsync(dto);
-
-            return result switch
-            {
-                RestockInventoryResult.Success => Ok(),
-                RestockInventoryResult.InventoryItemNotFound => NotFound(new { message = "Inventory item not found." }),
-                RestockInventoryResult.InvalidQuantity => BadRequest(new { message = "Quantity must be greater than zero." }),
-                _ => StatusCode(500, new { message = "An unexpected error occurred while restocking inventory." })
-            };
+            return Ok(result);
         }
     }
 }

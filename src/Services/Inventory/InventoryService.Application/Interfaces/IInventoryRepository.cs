@@ -11,9 +11,8 @@ namespace InventoryService.Application.Interfaces
         Task<InventoryItem?> GetInventoryItemByIdAsync(Guid id);
         Task<InventoryItem?> GetInventoryItemByProductIdAsync(Guid productId);
         Task<bool> ExistsByProductIdAsync(Guid productId);
-        Task<InventoryItem> AddInventoryItemAsync(InventoryItem inventoryItem);
-        Task<InventoryItem?> UpdateInventoryItemAsync(InventoryItem inventoryItem);
-        Task DeleteInventoryItemAsync(Guid id);
-        Task DeleteInventoryItemByProductIdAsync(Guid productId);
+        Task AddInventoryItemAsync(InventoryItem inventoryItem);
+        void DeleteInventoryItem(InventoryItem inventoryItem);
+        Task SaveChangesAsync();
     }
 }

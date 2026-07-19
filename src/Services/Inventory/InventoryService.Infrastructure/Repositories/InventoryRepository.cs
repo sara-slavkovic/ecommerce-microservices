@@ -37,40 +37,18 @@ namespace InventoryService.Infrastructure.Repositories
             return await _context.InventoryItems.AnyAsync(i => i.ProductId == productId);
         }
 
-        public async Task<InventoryItem> AddInventoryItemAsync(InventoryItem inventoryItem)
+        public async Task AddInventoryItemAsync(InventoryItem inventoryItem)
         {
-            _context.InventoryItems.Add(inventoryItem);
-            await _context.SaveChangesAsync();
-            return inventoryItem;
+            await _context.InventoryItems.AddAsync(inventoryItem);
         }
 
-        public async Task<InventoryItem?> UpdateInventoryItemAsync(InventoryItem inventoryItem)
+        public void DeleteInventoryItem(InventoryItem inventoryItem)
         {
-            await _context.SaveChangesAsync();
-            return inventoryItem;
-        }
-
-        public async Task DeleteInventoryItemAsync(Guid id)
-        {
-            var inventoryItem = await _context.InventoryItems.FindAsync(id);
-
-            if (inventoryItem == null)
-            {
-                return;
-            }
-
             _context.InventoryItems.Remove(inventoryItem);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteInventoryItemByProductIdAsync(Guid productId)
+        public async Task SaveChangesAsync()
         {
-            var inventoryItem = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-
-            if (inventoryItem == null)
-                return;
-
-            _context.InventoryItems.Remove(inventoryItem);
             await _context.SaveChangesAsync();
         }
     }
