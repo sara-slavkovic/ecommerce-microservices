@@ -9,10 +9,10 @@ namespace CatalogService.Application.Interfaces
     {
         Task<IEnumerable<Category>> GetAllCategoriesAsync();
         Task<Category?> GetCategoryByIdAsync(Guid id);
-        Task<Category> AddCategoryAsync(Category category);
-        Task<Category?> UpdateCategoryAsync(Category category);
-        Task DeleteCategoryAsync(Guid id);
+        Task AddCategoryAsync(Category category);
+        void DeleteCategory(Category category);
         Task<bool> HasSubcategoriesAsync(Guid categoryId);
         Task<bool> HasProductsAsync(Guid categoryId);
+        Task SaveChangesAsync();
     }
 }

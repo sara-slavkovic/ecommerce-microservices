@@ -11,11 +11,11 @@ namespace CatalogService.Application.Interfaces
         Task<Product?> GetProductByIdAsync(Guid id);
         Task<Product?> GetProductBySkuAsync(string sku);
         Task<List<Product>> GetProductsByCategoryIdAsync(Guid categoryId);
-        Task<Product> AddProductAsync(Product product);
-        Task<Product?> UpdateProductAsync(Product product);
-        Task DeleteProductAsync(Guid id);
+        Task AddProductAsync(Product product);
+        void DeleteProduct(Product product);
         Task<bool> ExistsBySkuAsync(string sku);
         Task<bool> ExistsBySkuExcludingIdAsync(string sku, Guid excludeId);
         Task<bool> CategoryExistsAsync(Guid id);
+        Task SaveChangesAsync();
     }
 }

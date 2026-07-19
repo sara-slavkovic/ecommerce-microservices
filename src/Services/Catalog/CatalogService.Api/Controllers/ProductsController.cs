@@ -51,53 +51,32 @@ namespace CatalogService.Api.Controllers
         [SwaggerOperation(Summary = "Create product")]
         public async Task<IActionResult> CreateProduct([FromBody] CreateProductDto dto)
         {
-            try
-            {
-                var createdProduct = await _productService.CreateProductAsync(dto);
-                return CreatedAtAction(nameof(GetProductById), new { id = createdProduct.Id }, createdProduct);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var createdProduct = await _productService.CreateProductAsync(dto);
+            return CreatedAtAction(nameof(GetProductById), new { id = createdProduct.Id }, createdProduct);
         }
 
         [HttpPut("{id:guid}")]
         [SwaggerOperation(Summary = "Update product")]
         public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] UpdateProductDto dto)
         {
-            try
-            {
-                var updatedProduct = await _productService.UpdateProductAsync(id, dto);
+            var updatedProduct = await _productService.UpdateProductAsync(id, dto);
 
-                if (updatedProduct == null)
-                    return NotFound();
+            if (updatedProduct == null)
+                return NotFound();
 
-                return Ok(updatedProduct);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return Ok(updatedProduct);
         }
 
         [HttpDelete("{id:guid}")]
         [SwaggerOperation(Summary = "Delete product")]
         public async Task<IActionResult> DeleteProduct(Guid id)
         {
-            try
-            {
-                var deleted = await _productService.DeleteProductAsync(id);
+            var deleted = await _productService.DeleteProductAsync(id);
 
-                if (!deleted)
-                    return NotFound();
+            if (!deleted)
+                return NotFound();
 
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return Problem(ex.Message);
-            }
+            return NoContent();
         }
 
         [HttpPost("upload-image")]
@@ -107,17 +86,10 @@ namespace CatalogService.Api.Controllers
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "No file was uploaded." });
 
-            try
-            {
-                using var stream = file.OpenReadStream();
-                var imageUrl = await _imageService.UploadProductImageAsync(stream, file.FileName, productName);
+            using var stream = file.OpenReadStream();
+            var imageUrl = await _imageService.UploadProductImageAsync(stream, file.FileName, productName);
 
-                return Ok(new { imageUrl });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return Ok(new { imageUrl });
         }
     }
 }

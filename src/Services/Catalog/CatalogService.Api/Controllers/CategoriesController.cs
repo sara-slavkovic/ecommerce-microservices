@@ -1,5 +1,4 @@
 ﻿using CatalogService.Application.DTOs;
-using CatalogService.Application.Enums;
 using CatalogService.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -43,52 +42,31 @@ namespace CatalogService.Api.Controllers
         [SwaggerOperation(Summary = "Create category")]
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto dto)
         {
-            try
-            {
-                var createdCategory = await _categoryService.CreateCategoryAsync(dto);
-                return CreatedAtAction(nameof(GetCategoryById), new { id = createdCategory.Id }, createdCategory);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var createdCategory = await _categoryService.CreateCategoryAsync(dto);
+            return CreatedAtAction(nameof(GetCategoryById), new { id = createdCategory.Id }, createdCategory);
         }
 
         [HttpPut("{id:guid}")]
         [SwaggerOperation("Update category")]
         public async Task<IActionResult> UpdateCategory(Guid id, [FromBody] UpdateCategoryDto dto)
         {
-            try
-            {
-                var updatedCategory = await _categoryService.UpdateCategoryAsync(id, dto);
+            var updatedCategory = await _categoryService.UpdateCategoryAsync(id, dto);
 
-                if (updatedCategory == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(updatedCategory);
-            }
-            catch (Exception ex)
+            if (updatedCategory == null)
             {
-                return BadRequest(new { message = ex.Message });
+                return NotFound();
             }
+
+            return Ok(updatedCategory);
         }
 
         [HttpDelete("{id:guid}")]
         [SwaggerOperation("Delete category")]
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
-            var result = await _categoryService.DeleteCategoryAsync(id);
+            await _categoryService.DeleteCategoryAsync(id);
 
-            return result switch
-            {
-                DeleteCategoryResult.Success => NoContent(),
-                DeleteCategoryResult.NotFound => NotFound(),
-                DeleteCategoryResult.HasSubcategories => Conflict(new { message = "Category has subcategories and cannot be deleted." }),
-                DeleteCategoryResult.HasProducts => Conflict(new { message = "Category has products and cannot be deleted." }),
-                _ => StatusCode(500, new { message = "An unexpected error occurred while deleting the category." })
-            };
+            return NoContent();
         }
     }
 }

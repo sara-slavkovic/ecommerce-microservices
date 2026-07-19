@@ -30,6 +30,10 @@ builder.Services.AddHttpClient<CatalogService.Application.Interfaces.IInventoryS
 builder.Services.AddValidatorsFromAssemblyContaining<CatalogService.Application.Validators.CreateCategoryDtoValidator>(ServiceLifetime.Transient);
 //builder.Services.AddValidatorsFromAssemblyContaining<CatalogService.Application.Validators.UpdateCategoryDtoValidator>(ServiceLifetime.Transient);
 
+builder.Services.AddExceptionHandler<SharedKernel.Web.ExceptionHandlers.ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<SharedKernel.Web.ExceptionHandlers.GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 
 app.UseStaticFiles();
@@ -40,6 +44,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 

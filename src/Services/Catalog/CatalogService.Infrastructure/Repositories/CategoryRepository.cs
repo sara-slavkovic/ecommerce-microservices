@@ -27,30 +27,14 @@ namespace CatalogService.Infrastructure.Repositories
             return await _context.Categories.FindAsync(id);
         }
 
-        public async Task<Category> AddCategoryAsync(Category category)
+        public async Task AddCategoryAsync(Category category)
         {
-            _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
-            return category;
+            await _context.Categories.AddAsync(category);
         }
 
-        public async Task<Category?> UpdateCategoryAsync(Category category)
+        public void DeleteCategory(Category category)
         {
-            await _context.SaveChangesAsync();
-            return category;
-        }
-
-        public async Task DeleteCategoryAsync(Guid id)
-        {
-            var category = await _context.Categories.FindAsync(id);
-
-            if (category == null)
-            {
-                return;
-            }
-
             _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> HasSubcategoriesAsync(Guid categoryId)
@@ -61,6 +45,11 @@ namespace CatalogService.Infrastructure.Repositories
         public async Task<bool> HasProductsAsync(Guid categoryId)
         {
             return await _context.Products.AnyAsync(p => p.CategoryId == categoryId);
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

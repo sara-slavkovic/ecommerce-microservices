@@ -37,30 +37,14 @@ namespace CatalogService.Infrastructure.Repositories
             return await _context.Products.Include(p => p.Category).Where(p => p.CategoryId == categoryId).ToListAsync();
         }
 
-        public async Task<Product> AddProductAsync(Product product)
+        public async Task AddProductAsync(Product product)
         {
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-            return product;
+            await _context.Products.AddAsync(product);
         }
 
-        public async Task<Product?> UpdateProductAsync(Product product)
+        public void DeleteProduct(Product product)
         {
-            await _context.SaveChangesAsync();
-            return product;
-        }
-
-        public async Task DeleteProductAsync(Guid id)
-        {
-            var product = await _context.Products.FindAsync(id);
-
-            if (product == null)
-            {
-                return;
-            }
-
             _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> CategoryExistsAsync(Guid id)
@@ -76,6 +60,11 @@ namespace CatalogService.Infrastructure.Repositories
         public async Task<bool> ExistsBySkuExcludingIdAsync(string sku, Guid excludeId)
         {
             return await _context.Products.AnyAsync(p => p.Sku == sku && p.Id != excludeId);    
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

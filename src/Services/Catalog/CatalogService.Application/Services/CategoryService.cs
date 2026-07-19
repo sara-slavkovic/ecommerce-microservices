@@ -1,8 +1,8 @@
 ﻿using CatalogService.Application.DTOs;
-using CatalogService.Application.Enums;
 using CatalogService.Application.Interfaces;
 using CatalogService.Domain.Entities;
 using FluentValidation;
+using SharedKernel.Domain.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -26,30 +26,19 @@ namespace CatalogService.Application.Services
         {
             var categories = await _categoryRepository.GetAllCategoriesAsync();
 
-            return categories.Select(c => new CategoryDto
-            {
-                Id = c.Id,
-                Name = c.Name,
-                ParentCategoryId = c.ParentCategoryId
-            });
+            return categories.Select(c => MapToDto(c));
         }
 
         public async Task<CategoryDto?> GetCategoryByIdAsync(Guid id)
         {
             var category = await _categoryRepository.GetCategoryByIdAsync(id);
 
-            return category == null ? null : new CategoryDto
-            {
-                Id = category.Id,
-                Name = category.Name,
-                ParentCategoryId = category.ParentCategoryId
-            };
+            return category == null ? null : MapToDto(category);
         }
 
         public async Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto dto)
         {
             var validationResult = await _createValidator.ValidateAsync(dto);
-
             if (!validationResult.IsValid)
             {
                 throw new ValidationException(validationResult.Errors);
@@ -62,14 +51,10 @@ namespace CatalogService.Application.Services
                 ParentCategoryId = dto.ParentCategoryId
             };
 
-            var createdCategory = await _categoryRepository.AddCategoryAsync(category);
+            await _categoryRepository.AddCategoryAsync(category);
+            await _categoryRepository.SaveChangesAsync();
 
-            return new CategoryDto
-            {
-                Id = createdCategory.Id,
-                Name = createdCategory.Name,
-                ParentCategoryId = createdCategory.ParentCategoryId
-            };
+            return MapToDto(category);
         }
 
         public async Task<CategoryDto?> UpdateCategoryAsync(Guid id, UpdateCategoryDto dto)
@@ -91,39 +76,43 @@ namespace CatalogService.Application.Services
             existingCategory.Name = dto.Name;
             existingCategory.ParentCategoryId = dto.ParentCategoryId;
 
-            var updatedCategory = await _categoryRepository.UpdateCategoryAsync(existingCategory);
+            await _categoryRepository.SaveChangesAsync();
 
-            return updatedCategory == null ? null : new CategoryDto
-            {
-                Id = updatedCategory.Id,
-                Name = updatedCategory.Name,
-                ParentCategoryId = updatedCategory.ParentCategoryId
-            };
+            return MapToDto(existingCategory);
         }
 
-        public async Task<DeleteCategoryResult> DeleteCategoryAsync(Guid id)
+        public async Task DeleteCategoryAsync(Guid id)
         {
             var category = await _categoryRepository.GetCategoryByIdAsync(id);
-
             if (category == null)
             {
-                return DeleteCategoryResult.NotFound;
+                throw new NotFoundException($"Category with ID {id} was not found.");
             }
 
             var hasSubcategories = await _categoryRepository.HasSubcategoriesAsync(id);
             if (hasSubcategories)
             {
-                return DeleteCategoryResult.HasSubcategories;
+                throw new ConflictException("Category has subcategories and cannot be deleted.");
             }
 
             var hasProducts = await _categoryRepository.HasProductsAsync(id);
             if (hasProducts)
             {
-                return DeleteCategoryResult.HasProducts;
+                throw new ConflictException("Category has products and cannot be deleted.");
             }
 
-            await _categoryRepository.DeleteCategoryAsync(id);
-            return DeleteCategoryResult.Success;
+            _categoryRepository.DeleteCategory(category);
+            await _categoryRepository.SaveChangesAsync();
+        }
+
+        private static CategoryDto MapToDto(Category category)
+        {
+            return new CategoryDto
+            {
+                Id = category.Id,
+                Name = category.Name,
+                ParentCategoryId = category.ParentCategoryId
+            };
         }
     }
 }

@@ -2,6 +2,7 @@
 using CatalogService.Application.Interfaces;
 using CatalogService.Domain.Entities;
 using FluentValidation;
+using SharedKernel.Domain.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -55,13 +56,13 @@ namespace CatalogService.Application.Services
             var categoryExists = await _productRepository.CategoryExistsAsync(dto.CategoryId);
             if (!categoryExists)
             {
-                throw new InvalidOperationException("Category does not exist.");
+                throw new NotFoundException("Category does not exist.");
             }
 
             var skuExists = await _productRepository.ExistsBySkuAsync(dto.Sku);
             if (skuExists)
             {
-                throw new InvalidOperationException("Product with this SKU already exists.");
+                throw new ConflictException("Product with this SKU already exists.");
             }
 
             var product = new Product
@@ -77,19 +78,20 @@ namespace CatalogService.Application.Services
                 CategoryId = dto.CategoryId
             };
 
-            var createdProduct = await _productRepository.AddProductAsync(product);
+            await _productRepository.AddProductAsync(product);
 
             try
             {
-                await _inventoryServiceClient.CreateInventoryItemAsync(createdProduct.Id, dto.InitialStockQuantity);
+                await _inventoryServiceClient.CreateInventoryItemAsync(product.Id, dto.InitialStockQuantity);
             }
             catch (Exception)
             {
-                await _productRepository.DeleteProductAsync(createdProduct.Id);
-                throw new InvalidOperationException("Product was created, but inventory creation failed. Product creation has been rolled back.");
+                throw new ConflictException("Failed to create product inventory tracking. Operation aborted.");
             }
 
-            return MapToDto(createdProduct);
+            await _productRepository.SaveChangesAsync();
+
+            return MapToDto(product);
         }
 
         public async Task<ProductDto?> UpdateProductAsync(Guid id, UpdateProductDto dto)
@@ -109,13 +111,13 @@ namespace CatalogService.Application.Services
             var categoryExists = await _productRepository.CategoryExistsAsync(dto.CategoryId);
             if (!categoryExists)
             {
-                throw new InvalidOperationException("Category does not exist.");
+                throw new NotFoundException("Category does not exist.");
             }
 
             var skuExists = await _productRepository.ExistsBySkuExcludingIdAsync(dto.Sku, id);
             if (skuExists)
             {
-                throw new InvalidOperationException("Another product with this SKU already exists.");
+                throw new ConflictException("Another product with this SKU already exists.");
             }
 
             existingProduct.Sku = dto.Sku;
@@ -127,15 +129,14 @@ namespace CatalogService.Application.Services
             existingProduct.IsActive = dto.IsActive;
             existingProduct.CategoryId = dto.CategoryId;
 
-            var updatedProduct = await _productRepository.UpdateProductAsync(existingProduct);
+            await _productRepository.SaveChangesAsync();
 
-            return updatedProduct == null ? null : MapToDto(updatedProduct);
+            return MapToDto(existingProduct);
         }
 
         public async Task<bool> DeleteProductAsync(Guid id)
         {
             var product = await _productRepository.GetProductByIdAsync(id);
-
             if (product == null)
             {
                 return false;
@@ -147,10 +148,12 @@ namespace CatalogService.Application.Services
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"Cannot delete product {id} because inventory cleanup failed: {ex.Message}", ex);
+                throw new ConflictException($"Cannot delete product {id} because inventory cleanup failed: {ex.Message}");
             }
-            
-            await _productRepository.DeleteProductAsync(id);
+
+            _productRepository.DeleteProduct(product);
+            await _productRepository.SaveChangesAsync();
+
             return true;
         }
 

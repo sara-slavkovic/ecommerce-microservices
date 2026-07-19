@@ -24,7 +24,8 @@ namespace CatalogService.Infrastructure.Services
             if (!allowedExtensions.Contains(extension))
                 throw new ArgumentException("Only .jpg .jpeg .png and .webp files are allowed.");
 
-            var imagesFolder = Path.Combine(_env.WebRootPath, "images");
+            var rootPath = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+            var imagesFolder = Path.Combine(rootPath, "images");
 
             if (!Directory.Exists(imagesFolder))
                 Directory.CreateDirectory(imagesFolder);

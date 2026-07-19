@@ -1,6 +1,7 @@
 ﻿using CatalogService.Application.DTOs;
 using CatalogService.Application.Interfaces;
 using Microsoft.Extensions.Configuration;
+using SharedKernel.Domain.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Json;
@@ -39,7 +40,7 @@ namespace CatalogService.Infrastructure.Clients
             if (!response.IsSuccessStatusCode)
             {
                 var errorMessage = await response.Content.ReadAsStringAsync();
-                throw new InvalidOperationException($"Failed to create inventory item. {errorMessage}");
+                throw new ServiceUnavailableException($"Failed to create inventory item. {errorMessage}");
             }
         }
 
@@ -50,7 +51,7 @@ namespace CatalogService.Infrastructure.Clients
             if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.NotFound)
             {
                 var errorMessage = await response.Content.ReadAsStringAsync();
-                throw new InvalidOperationException($"Failed to delete inventory item. {errorMessage}");
+                throw new ServiceUnavailableException($"Failed to delete inventory item. {errorMessage}");
             }
         }
     }
