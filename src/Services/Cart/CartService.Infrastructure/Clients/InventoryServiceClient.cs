@@ -1,5 +1,6 @@
 ﻿using CartService.Application.DTOs;
 using CartService.Application.Interfaces;
+using SharedKernel.Domain.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -29,7 +30,7 @@ namespace CartService.Infrastructure.Clients
                 }
 
                 var errorMessage = await response.Content.ReadAsStringAsync();
-                throw new InvalidOperationException($"Failed to fetch inventory item. {errorMessage}");
+                throw new ServiceUnavailableException($"Failed to fetch inventory item. {errorMessage}");
             }
 
             return await response.Content.ReadFromJsonAsync<InventoryAvailabilityDto>();

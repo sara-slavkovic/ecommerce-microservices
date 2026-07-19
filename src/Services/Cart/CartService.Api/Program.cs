@@ -1,4 +1,3 @@
-using CartService.Infrastructure.Persistence;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,8 +12,7 @@ builder.Services.AddSwaggerGen(c =>
     c.EnableAnnotations();
 });
 
-builder.Services.AddDbContext<CartService.Infrastructure.Persistence.CartDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("CartDatabase")));
+builder.Services.AddDbContext<CartService.Infrastructure.Persistence.CartDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("CartDatabase")));
 
 builder.Services.AddScoped<CartService.Application.Interfaces.ICartRepository, CartService.Infrastructure.Repositories.CartRepository>();
 builder.Services.AddScoped<CartService.Application.Interfaces.ICartService, CartService.Application.Services.CartService>();
@@ -31,6 +29,10 @@ builder.Services.AddHttpClient<CartService.Application.Interfaces.IInventoryServ
 
 builder.Services.AddValidatorsFromAssemblyContaining<CartService.Application.Validators.CreateCartItemDtoValidator>(ServiceLifetime.Transient);
 
+builder.Services.AddExceptionHandler<SharedKernel.Web.ExceptionHandlers.ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<SharedKernel.Web.ExceptionHandlers.GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -39,6 +41,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 

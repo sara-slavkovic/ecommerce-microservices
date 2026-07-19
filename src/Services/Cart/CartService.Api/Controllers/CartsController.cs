@@ -32,35 +32,21 @@ namespace CartService.Api.Controllers
         [SwaggerOperation(Summary = "Add item to cart")]
         public async Task<IActionResult> AddItemToCart([FromBody] CreateCartItemDto dto)
         {
-            try
-            {
-                var cart = await _cartService.AddItemToCartAsync(dto);
-                return Ok(cart);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var cart = await _cartService.AddItemToCartAsync(dto);
+            return Ok(cart);
         }
 
         [HttpPut("items")]
         [SwaggerOperation(Summary = "Update cart item quantity")]
         public async Task<IActionResult> UpdateCartItemQuantity([FromBody] UpdateCartItemQuantityDto dto)
         {
-            try
+            var cart = await _cartService.UpdateCartItemQuantityAsync(dto);
+            if (cart == null)
             {
-                var cart = await _cartService.UpdateCartItemQuantityAsync(dto);
-                if (cart == null)
-                {
-                    return NotFound();
-                }
+                return NotFound();
+            }
 
-                return Ok(cart);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return Ok(cart);
         }
 
         [HttpDelete("user/{userId:guid}/items/{productId:guid}")]

@@ -2,6 +2,7 @@
 using CartService.Application.Interfaces;
 using CartService.Domain.Entities;
 using FluentValidation;
+using SharedKernel.Domain.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -61,7 +62,7 @@ namespace CartService.Application.Services
             {
                 var newQuantity = existingItem.Quantity + dto.Quantity;
                 if (newQuantity > inventory.AvailableQuantity)
-                    throw new InvalidOperationException("Not enough stock available.");
+                    throw new ConflictException("Not enough stock available.");
 
                 existingItem.Quantity = newQuantity;
                 existingItem.PricePerUnit = product.Price;
@@ -69,7 +70,7 @@ namespace CartService.Application.Services
             else
             {
                 if (dto.Quantity > inventory.AvailableQuantity)
-                    throw new InvalidOperationException("Not enough stock available.");
+                    throw new ConflictException("Not enough stock available.");
 
                 cart.CartItems.Add(new CartItem
                 {
@@ -85,19 +86,10 @@ namespace CartService.Application.Services
 
             if (isNewCart)
             {
-                var newItem = cart.CartItems.First();
-                await _cartRepository.InsertCartWithItemAsync(cart, newItem);
+                await _cartRepository.AddCartAsync(cart);
             }
-            else
-            {
-                if (existingItem != null)
-                    await _cartRepository.UpdateCartAndItemAsync(cart, existingItem);
-                else
-                {
-                    var newItem = cart.CartItems.Last();
-                    await _cartRepository.InsertCartItemAsync(cart, newItem);
-                }
-            }
+
+            await _cartRepository.SaveChangesAsync();
 
             return await MapToCartDtoAsync(cart);
         }
@@ -117,7 +109,7 @@ namespace CartService.Application.Services
             var (product, inventory) = await GetProductAndInventoryAsync(dto.ProductId);
 
             if (dto.Quantity > inventory.AvailableQuantity)
-                throw new InvalidOperationException("Not enough stock available.");
+                throw new ConflictException("Not enough stock available.");
 
             cartItem.Quantity = dto.Quantity;
             cartItem.PricePerUnit = product.Price;
@@ -125,7 +117,7 @@ namespace CartService.Application.Services
             cart.TotalAmount = cart.CartItems.Sum(ci => ci.Quantity * ci.PricePerUnit);
             cart.UpdatedAt = DateTime.Now;
 
-            await _cartRepository.UpdateCartAndItemAsync(cart, cartItem);
+            await _cartRepository.SaveChangesAsync();
 
             return await MapToCartDtoAsync(cart);
         }
@@ -142,7 +134,7 @@ namespace CartService.Application.Services
             cart.TotalAmount = cart.CartItems.Sum(ci => ci.Quantity * ci.PricePerUnit);
             cart.UpdatedAt = DateTime.Now;
 
-            await _cartRepository.DeleteCartItemAndUpdateCartAsync(cartItem.Id, cart);
+            await _cartRepository.SaveChangesAsync();
 
             return true;
         }
@@ -152,7 +144,9 @@ namespace CartService.Application.Services
             var cart = await _cartRepository.GetCartWithItemsByUserIdAsync(userId);
             if (cart == null) return false;
 
-            await _cartRepository.DeleteCartAsync(cart.Id);
+            _cartRepository.DeleteCart(cart);
+            await _cartRepository.SaveChangesAsync();
+
             return true;
         }
 
@@ -166,11 +160,11 @@ namespace CartService.Application.Services
             var inventory = inventoryTask.Result;
 
             if (product == null)
-                throw new InvalidOperationException("Product not found.");
+                throw new NotFoundException("Product not found.");
             if (!product.IsActive)
-                throw new InvalidOperationException("Product is not available for purchase.");
+                throw new BadRequestException("Product is not available for purchase.");
             if (inventory == null)
-                throw new InvalidOperationException("Inventory not found.");
+                throw new NotFoundException("Inventory not found.");
 
             return (product, inventory);
         }
