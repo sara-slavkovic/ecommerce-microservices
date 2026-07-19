@@ -18,6 +18,7 @@ namespace SharedKernel.Web.ExceptionHandlers
                 NotFoundException => (StatusCodes.Status404NotFound, "Not Found", exception.Message),
                 BadRequestException => (StatusCodes.Status400BadRequest, "Bad Request", exception.Message),
                 ConflictException => (StatusCodes.Status409Conflict, "Conflict", exception.Message),
+                ServiceUnavailableException => (StatusCodes.Status503ServiceUnavailable, "Service Unavailable", exception.Message),
                 _ => (StatusCodes.Status500InternalServerError, "Server Error", "An unexpected error occurred.")
             };
 
