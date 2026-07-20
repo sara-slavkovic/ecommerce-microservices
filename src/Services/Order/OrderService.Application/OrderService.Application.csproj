@@ -12,11 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Validators\" />
-    <Folder Include="Services\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\..\..\SharedKernel\SharedKernel.Domain\SharedKernel.Domain.csproj" />
     <ProjectReference Include="..\OrderService.Domain\OrderService.Domain.csproj" />
   </ItemGroup>
 

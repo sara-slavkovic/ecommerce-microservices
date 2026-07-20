@@ -22,7 +22,6 @@ var internalApiKey = builder.Configuration["InternalApiKey"] ?? throw new Argume
 builder.Services.AddHttpClient<CartService.Application.Interfaces.ICatalogServiceClient, CartService.Infrastructure.Clients.CatalogServiceClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Services:CatalogService"] ?? throw new InvalidOperationException("CatalogService URL is not configured."));
-    client.DefaultRequestHeaders.Add("X-Internal-Api-Key", internalApiKey);
 });
 
 builder.Services.AddHttpClient<CartService.Application.Interfaces.IInventoryServiceClient, CartService.Infrastructure.Clients.InventoryServiceClient>(client =>

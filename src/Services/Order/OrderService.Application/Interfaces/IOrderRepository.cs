@@ -10,7 +10,7 @@ namespace OrderService.Application.Interfaces
     {
         Task<Order?> GetOrderByIdAsync(Guid id);
         Task<IEnumerable<Order>> GetOrdersByUserIdAsync(Guid userId);
-        Task<Order> AddOrderAsync(Order order);
-        Task UpdateOrderStatusAsync(Guid id, OrderStatus status);
+        Task AddOrderAsync(Order order);
+        Task SaveChangesAsync();
     }
 }
