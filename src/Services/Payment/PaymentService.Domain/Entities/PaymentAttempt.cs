@@ -10,7 +10,7 @@ namespace PaymentService.Domain.Entities
         public Guid PaymentId { get; set; }
         public int AttemptNumber { get; set; }
         public int StatusCode { get; set; }
-        public string ErrorMessage { get; set; } = string.Empty;
+        public string? ErrorMessage { get; set; }
         public DateTime StartedAt { get; set; }
         public DateTime FinishedAt { get; set; }
         public int DurationMs { get; set; }
