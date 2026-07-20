@@ -22,9 +22,12 @@ builder.Services.AddScoped<CatalogService.Application.Interfaces.IProductService
 
 builder.Services.AddScoped<CatalogService.Application.Interfaces.IImageService, CatalogService.Infrastructure.Services.ImageService>();
 
+var internalApiKey = builder.Configuration["InternalApiKey"] ?? throw new ArgumentNullException("InternalApiKey is missing");
+
 builder.Services.AddHttpClient<CatalogService.Application.Interfaces.IInventoryServiceClient, CatalogService.Infrastructure.Clients.InventoryServiceClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["Services:InventoryService"] ?? throw new Exception("InventoryService URL is not configured."));
+    client.BaseAddress = new Uri(builder.Configuration["Services:InventoryService"] ?? throw new InvalidOperationException("InventoryService URL is not configured."));
+    client.DefaultRequestHeaders.Add("X-Internal-Api-Key", internalApiKey);
 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<CatalogService.Application.Validators.CreateCategoryDtoValidator>(ServiceLifetime.Transient);

@@ -17,14 +17,18 @@ builder.Services.AddDbContext<CartService.Infrastructure.Persistence.CartDbConte
 builder.Services.AddScoped<CartService.Application.Interfaces.ICartRepository, CartService.Infrastructure.Repositories.CartRepository>();
 builder.Services.AddScoped<CartService.Application.Interfaces.ICartService, CartService.Application.Services.CartService>();
 
+var internalApiKey = builder.Configuration["InternalApiKey"] ?? throw new ArgumentNullException("InternalApiKey is missing");
+
 builder.Services.AddHttpClient<CartService.Application.Interfaces.ICatalogServiceClient, CartService.Infrastructure.Clients.CatalogServiceClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["Services:CatalogService"] ?? throw new Exception("CatalogService URL is not configured."));
+    client.BaseAddress = new Uri(builder.Configuration["Services:CatalogService"] ?? throw new InvalidOperationException("CatalogService URL is not configured."));
+    client.DefaultRequestHeaders.Add("X-Internal-Api-Key", internalApiKey);
 });
 
 builder.Services.AddHttpClient<CartService.Application.Interfaces.IInventoryServiceClient, CartService.Infrastructure.Clients.InventoryServiceClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["Services:InventoryService"] ?? throw new Exception("InventoryService URL is not configured."));
+    client.BaseAddress = new Uri(builder.Configuration["Services:InventoryService"] ?? throw new InvalidOperationException("InventoryService URL is not configured."));
+    client.DefaultRequestHeaders.Add("X-Internal-Api-Key", internalApiKey);
 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<CartService.Application.Validators.CreateCartItemDtoValidator>(ServiceLifetime.Transient);

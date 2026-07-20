@@ -146,9 +146,9 @@ namespace CatalogService.Application.Services
             {
                 await _inventoryServiceClient.DeleteInventoryItemByProductIdAsync(id);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new ConflictException($"Cannot delete product {id} because inventory cleanup failed: {ex.Message}");
+                throw new ConflictException($"Cannot delete product {id} because inventory cleanup failed.");
             }
 
             _productRepository.DeleteProduct(product);

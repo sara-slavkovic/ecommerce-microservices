@@ -1,6 +1,5 @@
 ﻿using CatalogService.Application.DTOs;
 using CatalogService.Application.Interfaces;
-using Microsoft.Extensions.Configuration;
 using SharedKernel.Domain.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -13,12 +12,10 @@ namespace CatalogService.Infrastructure.Clients
     public class InventoryServiceClient : IInventoryServiceClient
     {
         private readonly HttpClient _httpClient;
-        private readonly string _internalApiKey;
 
-        public InventoryServiceClient(HttpClient httpClient, IConfiguration configuration)
+        public InventoryServiceClient(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _internalApiKey = configuration["InternalApiKey"] ?? throw new ArgumentNullException("InternalApiKey configuration is missing.");
         }
 
         public async Task CreateInventoryItemAsync(Guid productId, int availableQuantity)
@@ -29,13 +26,7 @@ namespace CatalogService.Infrastructure.Clients
                 AvailableQuantity = availableQuantity
             };
 
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/inventories/internal")
-            {
-                Content = JsonContent.Create(request)
-            };
-            httpRequest.Headers.Add("X-Internal-Api-Key", _internalApiKey);
-
-            var response = await _httpClient.SendAsync(httpRequest);
+            var response = await _httpClient.PostAsJsonAsync("/api/inventories/internal", request);
 
             if (!response.IsSuccessStatusCode)
             {

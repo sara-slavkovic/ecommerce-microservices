@@ -1,8 +1,8 @@
-﻿using InventoryService.Api.Filters;
-using InventoryService.Application.DTOs;
+﻿using InventoryService.Application.DTOs;
 using InventoryService.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SharedKernel.Web.Filters;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace InventoryService.Api.Controllers
@@ -38,7 +38,9 @@ namespace InventoryService.Api.Controllers
             return Ok(inventoryItem);
         }
 
+        // Inter-service check called by CartService
         [HttpGet("product/{productId:guid}")]
+        [InternalApiKey]
         [SwaggerOperation(Summary = "Get inventory item by product ID")]
         public async Task<IActionResult> GetInventoryItemByProductId(Guid productId)
         {
@@ -68,7 +70,9 @@ namespace InventoryService.Api.Controllers
             return NoContent();
         }
 
+        // Called by CatalogService when a product is deleted
         [HttpDelete("product/{productId:guid}")]
+        [InternalApiKey]
         [SwaggerOperation(Summary = "Delete inventory item by product ID")]
         public async Task<IActionResult> DeleteInventoryItemByProductId(Guid productId)
         {
@@ -76,7 +80,9 @@ namespace InventoryService.Api.Controllers
             return NoContent();
         }
 
+        // Called by OrderService to lock items
         [HttpPost("reserve")]
+        [InternalApiKey]
         [SwaggerOperation(Summary = "Reserve stock")]
         public async Task<IActionResult> ReserveStock([FromBody] ChangeInventoryQuantityDto dto)
         {
@@ -84,7 +90,9 @@ namespace InventoryService.Api.Controllers
             return Ok(result);
         }
 
+        // Called by OrderService if checkout fails
         [HttpPost("release")]
+        [InternalApiKey]
         [SwaggerOperation(Summary = "Release reserved stock")]
         public async Task<IActionResult> ReleaseStock([FromBody] ChangeInventoryQuantityDto dto)
         {
@@ -92,7 +100,9 @@ namespace InventoryService.Api.Controllers
             return Ok(result);
         }
 
+        // Called by OrderService when payment clears
         [HttpPost("confirm")]
+        [InternalApiKey]
         [SwaggerOperation(Summary = "Confirm stock deduction")]
         public async Task<IActionResult> ConfirmStock([FromBody] ChangeInventoryQuantityDto dto)
         {

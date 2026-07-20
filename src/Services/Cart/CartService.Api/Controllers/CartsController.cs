@@ -1,6 +1,7 @@
 ﻿using CartService.Application.DTOs;
 using CartService.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using SharedKernel.Web.Filters;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace CartService.Api.Controllers
@@ -61,7 +62,9 @@ namespace CartService.Api.Controllers
             return NoContent();
         }
 
+        // Called strictly by OrderService to clean up database records post-checkout
         [HttpDelete("user/{userId:guid}")]
+        [InternalApiKey]
         [SwaggerOperation(Summary = "Delete cart")]
         public async Task<IActionResult> DeleteCart(Guid userId)
         {

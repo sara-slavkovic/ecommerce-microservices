@@ -1,5 +1,7 @@
 ﻿using CatalogService.Application.Interfaces;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.HttpResults;
+using SharedKernel.Domain.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,7 +24,7 @@ namespace CatalogService.Infrastructure.Services
             var extension = Path.GetExtension(originalFileName).ToLowerInvariant();
 
             if (!allowedExtensions.Contains(extension))
-                throw new ArgumentException("Only .jpg .jpeg .png and .webp files are allowed.");
+                throw new BadRequestException("Only .jpg .jpeg .png and .webp files are allowed.");
 
             var rootPath = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
             var imagesFolder = Path.Combine(rootPath, "images");
