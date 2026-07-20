@@ -17,6 +17,9 @@
     <Project Path="src/Services/Inventory/InventoryService.Domain/InventoryService.Domain.csproj" Id="6573c0b9-3bb5-4b5d-8007-d5b0a73073a1" />
     <Project Path="src/Services/Inventory/InventoryService.Infrastructure/InventoryService.Infrastructure.csproj" Id="5abcd801-4091-4efb-8b3d-d0c9f1a84119" />
   </Folder>
+  <Folder Name="/MockPaymentGateway/">
+    <Project Path="src/MockPaymentGateway/MockPaymentGateway.Api/MockPaymentGateway.Api.csproj" Id="aeee1099-aac1-426b-9f5e-968f34920ebb" />
+  </Folder>
   <Folder Name="/Order/">
     <Project Path="src/Services/Order/OrderService.API/OrderService.Api.csproj" Id="a6dc85fe-cba9-4304-825d-8e72cfed542c" />
     <Project Path="src/Services/Order/OrderService.Application/OrderService.Application.csproj" Id="c4cbf2ca-53a9-4ba7-9a9a-ce7f8042e9d3" />

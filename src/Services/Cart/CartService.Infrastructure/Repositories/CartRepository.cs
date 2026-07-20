@@ -1,7 +1,6 @@
 ﻿using CartService.Application.Interfaces;
 using CartService.Domain.Entities;
 using CartService.Infrastructure.Persistence;
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

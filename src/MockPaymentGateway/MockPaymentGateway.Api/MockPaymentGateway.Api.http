@@ -1,0 +1,6 @@
+@MockPaymentGateway.Api_HostAddress = http://localhost:5263
+
+GET {{MockPaymentGateway.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
