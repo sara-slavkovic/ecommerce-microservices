@@ -1,6 +1,7 @@
 ﻿using CatalogService.Application.DTOs;
 using CatalogService.Application.Interfaces;
 using SharedKernel.Domain.Exceptions;
+using SharedKernel.Infrastructure.Http;
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Json;
@@ -27,23 +28,17 @@ namespace CatalogService.Infrastructure.Clients
             };
 
             var response = await _httpClient.PostAsJsonAsync("/api/inventories/internal", request);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorMessage = await response.Content.ReadAsStringAsync();
-                throw new ServiceUnavailableException($"Failed to create inventory item. {errorMessage}");
-            }
+            await response.EnsureSuccessOrThrowAsync("create inventory item");
         }
 
         public async Task DeleteInventoryItemByProductIdAsync(Guid productId)
         {
             var response = await _httpClient.DeleteAsync($"/api/inventories/product/{productId}");
 
-            if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.NotFound)
-            {
-                var errorMessage = await response.Content.ReadAsStringAsync();
-                throw new ServiceUnavailableException($"Failed to delete inventory item. {errorMessage}");
-            }
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                return;
+
+            await response.EnsureSuccessOrThrowAsync("delete inventory item");
         }
     }
 }

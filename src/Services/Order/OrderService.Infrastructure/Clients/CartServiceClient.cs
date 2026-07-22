@@ -1,8 +1,10 @@
 ﻿using OrderService.Application.DTOs;
 using OrderService.Application.Interfaces;
 using SharedKernel.Domain.Exceptions;
+using SharedKernel.Infrastructure.Http;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 
@@ -21,15 +23,10 @@ namespace OrderService.Infrastructure.Clients
         {
             var response = await _httpClient.GetAsync($"/api/carts/user/{userId}");
 
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            if (response.StatusCode == HttpStatusCode.NotFound)
                 return null;
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new ServiceUnavailableException($"Failed to get cart. {error}");
-            }
-
+            await response.EnsureSuccessOrThrowAsync("get cart");
             return await response.Content.ReadFromJsonAsync<CartSnapshotDto>();
         }
 
@@ -37,11 +34,10 @@ namespace OrderService.Infrastructure.Clients
         {
             var response = await _httpClient.DeleteAsync($"/api/carts/user/{userId}");
 
-            if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.NotFound)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new ServiceUnavailableException($"Failed to delete cart. {error}");
-            }
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return;
+
+            await response.EnsureSuccessOrThrowAsync("delete cart");
         }
     }
 }

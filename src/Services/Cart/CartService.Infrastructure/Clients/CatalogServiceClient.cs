@@ -1,6 +1,7 @@
 ﻿using CartService.Application.DTOs;
 using CartService.Application.Interfaces;
 using SharedKernel.Domain.Exceptions;
+using SharedKernel.Infrastructure.Http;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -22,17 +23,12 @@ namespace CartService.Infrastructure.Clients
         {
             var response = await _httpClient.GetAsync($"/api/products/{productId}");
 
-            if (!response.IsSuccessStatusCode)
+            if (response.StatusCode == HttpStatusCode.NotFound)
             {
-                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    return null;
-                }
-
-                var errorMessage = await response.Content.ReadAsStringAsync();
-                throw new ServiceUnavailableException($"Failed to fetch product. {errorMessage}");
+                return null;
             }
 
+            await response.EnsureSuccessOrThrowAsync("fetch product");
             return await response.Content.ReadFromJsonAsync<ProductSnapshotDto>();
         }
     }

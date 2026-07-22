@@ -1,6 +1,7 @@
 ﻿using OrderService.Application.DTOs;
 using OrderService.Application.Interfaces;
 using SharedKernel.Domain.Exceptions;
+using SharedKernel.Infrastructure.Http;
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Json;
@@ -20,34 +21,19 @@ namespace OrderService.Infrastructure.Clients
         public async Task ReserveStockAsync(InventoryChangeDto dto)
         {
             var response = await _httpClient.PostAsJsonAsync("/api/inventories/reserve", dto);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new ServiceUnavailableException($"Failed to reserve stock. {error}");
-            }
+            await response.EnsureSuccessOrThrowAsync("reserve stock");
         }
 
         public async Task ReleaseStockAsync(InventoryChangeDto dto)
         {
             var response = await _httpClient.PostAsJsonAsync("/api/inventories/release", dto);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new ServiceUnavailableException($"Failed to release stock. {error}");
-            }
+            await response.EnsureSuccessOrThrowAsync("release stock");
         }
 
         public async Task ConfirmStockDeductionAsync(InventoryChangeDto dto)
         {
             var response = await _httpClient.PostAsJsonAsync("/api/inventories/confirm", dto);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new ServiceUnavailableException($"Failed to confirm stock deduction. {error}");
-            }
+            await response.EnsureSuccessOrThrowAsync("confirm stock deduction");
         }
     }
 }

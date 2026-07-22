@@ -26,7 +26,7 @@
     <Project Path="src/Services/Order/OrderService.Domain/OrderService.Domain.csproj" Id="6b726a01-d212-4b20-b383-e03159480726" />
     <Project Path="src/Services/Order/OrderService.Infrastructure/OrderService.Infrastructure.csproj" Id="f8466ad4-25f3-49e1-840e-57a86d4939d5" />
   </Folder>
-  <Folder Name="/PaymentService/">
+  <Folder Name="/Payment/">
     <Project Path="src/Services/Payment/PaymentService.Api/PaymentService.Api.csproj" Id="bf1b5ae8-876a-4c87-8da7-e2a908378aca" />
     <Project Path="src/Services/Payment/PaymentService.Application/PaymentService.Application.csproj" Id="a89bdfd4-b89b-436e-a67a-1d47ce6ce677" />
     <Project Path="src/Services/Payment/PaymentService.Domain/PaymentService.Domain.csproj" Id="b2982fbc-47cc-4f88-81cb-164e904a33a9" />
@@ -34,6 +34,7 @@
   </Folder>
   <Folder Name="/SharedKernel/">
     <Project Path="src/SharedKernel/SharedKernel.Domain/SharedKernel.Domain.csproj" Id="c6bdad49-c217-410d-9d60-d62892d82456" />
+    <Project Path="src/SharedKernel/SharedKernel.Infrastructure/SharedKernel.Infrastructure.csproj" Id="dc4f79cd-cbfa-40d0-88fa-8b776a9dcaf3" />
     <Project Path="src/SharedKernel/SharedKernel.Web/SharedKernel.Web.csproj" Id="a2b49f84-b277-421e-9422-8a94275c6614" />
   </Folder>
 </Solution>
