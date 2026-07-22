@@ -2,7 +2,7 @@
 
 namespace MockPaymentGateway.Api.Services
 {
-    public interface IPaymentSimulator
+    public interface IPaymentSimulatorService
     {
         Task<ChargeResultDto> SimulateChargeAsync(ChargeRequestDto request);
     }

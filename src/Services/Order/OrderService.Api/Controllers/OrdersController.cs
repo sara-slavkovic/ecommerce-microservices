@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OrderService.Application.DTOs;
 using OrderService.Application.Interfaces;
+using SharedKernel.Web.Filters;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace OrderService.Api.Controllers
@@ -41,7 +42,9 @@ namespace OrderService.Api.Controllers
             return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, order);
         }
 
+        // called by PaymentService
         [HttpPost("{id:guid}/complete")]
+        [InternalApiKey]
         [SwaggerOperation(Summary = "Complete order after successful payment")]
         public async Task<IActionResult> CompleteOrder(Guid id)
         {
@@ -49,7 +52,9 @@ namespace OrderService.Api.Controllers
             return NoContent();
         }
 
+        // called by PaymentService
         [HttpPost("{id:guid}/cancel")]
+        [InternalApiKey]
         [SwaggerOperation(Summary = "Cancel order after failed payment")]
         public async Task<IActionResult> CancelOrder(Guid id)
         {

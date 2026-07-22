@@ -9,9 +9,9 @@ namespace MockPaymentGateway.Api.Controllers
     [Route("api/[controller]")]
     public class GatewayController : ControllerBase
     {
-        private readonly IPaymentSimulator _paymentSimulator;
+        private readonly IPaymentSimulatorService _paymentSimulator;
 
-        public GatewayController(IPaymentSimulator paymentSimulator)
+        public GatewayController(IPaymentSimulatorService paymentSimulator)
         {
             _paymentSimulator = paymentSimulator;
         }

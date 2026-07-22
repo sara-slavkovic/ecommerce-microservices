@@ -4,13 +4,13 @@ using MockPaymentGateway.Api.Enums;
 
 namespace MockPaymentGateway.Api.Services
 {
-    public class PaymentSimulator : IPaymentSimulator
+    public class PaymentSimulatorService : IPaymentSimulatorService
     {
         private readonly IMemoryCache _cache;
-        private readonly ILogger<PaymentSimulator> _logger;
+        private readonly ILogger<PaymentSimulatorService> _logger;
         private static readonly Random _random = new();
 
-        public PaymentSimulator(IMemoryCache cache, ILogger<PaymentSimulator> logger)
+        public PaymentSimulatorService(IMemoryCache cache, ILogger<PaymentSimulatorService> logger)
         {
             _cache = cache;
             _logger = logger;
@@ -18,9 +18,37 @@ namespace MockPaymentGateway.Api.Services
 
         public async Task<ChargeResultDto> SimulateChargeAsync(ChargeRequestDto request)
         {
-            // LOG 1: Prove the gateway received the request (watch this print multiple times during retries!)
+            // 1. TRUE IDEMPOTENCY CHECK (Prevents Double Charging)
+            var idempotencyCacheKey = $"idempotency_{request.IdempotencyKey}";
+            if (!string.IsNullOrWhiteSpace(request.IdempotencyKey))
+            {
+                if (_cache.TryGetValue(idempotencyCacheKey, out ChargeResultDto? cachedResult) && cachedResult != null)
+                {
+                    _logger.LogInformation("=> IDEMPOTENCY HIT! Returning previous exact result for Key {Key} (Double-charge prevented!)", request.IdempotencyKey);
+                    return cachedResult; // Return the exact same response as last time!
+                }
+            }
+
+            // LOG 1: Prove the gateway received a fresh request (this will print multiple times during retries!)
             _logger.LogInformation("=> Gateway received Charge Request for Order {OrderId} in Mode: {Mode}", request.OrderId, request.SimulationMode);
 
+            // Execute the simulation to get the result
+            var result = await ProcessSimulationAsync(request);
+
+            // 2. SAVE FINAL RESULT TO IDEMPOTENCY CACHE
+            // We ONLY cache final, definitive outcomes (200 Success, 402 Fatal Decline, etc.)
+            // We DO NOT cache 503 Transient failures, because we want the client (Polly) to retry those
+            if (!string.IsNullOrWhiteSpace(request.IdempotencyKey) && result.StatusCode != 503)
+            {
+                // Store the final outcome for 24 hours
+                _cache.Set(idempotencyCacheKey, result, TimeSpan.FromHours(24));
+            }
+
+            return result;
+        }
+
+        private async Task<ChargeResultDto> ProcessSimulationAsync(ChargeRequestDto request)
+        {
             switch (request.SimulationMode)
             {
                 case SimulationMode.AlwaysSucceed:

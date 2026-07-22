@@ -2,7 +2,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    // Allows string values like "AlwaysSucceed" to bind to the SimulationMode enum
+    options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -10,7 +14,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddMemoryCache();
-builder.Services.AddScoped<MockPaymentGateway.Api.Services.IPaymentSimulator, MockPaymentGateway.Api.Services.PaymentSimulator>();
+builder.Services.AddScoped<MockPaymentGateway.Api.Services.IPaymentSimulatorService, MockPaymentGateway.Api.Services.PaymentSimulatorService>();
 
 var app = builder.Build();
 
