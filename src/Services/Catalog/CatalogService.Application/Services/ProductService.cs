@@ -12,16 +12,18 @@ namespace CatalogService.Application.Services
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private readonly IInventoryServiceClient _inventoryServiceClient;
         private readonly IValidator<CreateProductDto> _createValidator;
         private readonly IValidator<UpdateProductDto> _updateValidator;
 
-        public ProductService(IProductRepository productRepository, IInventoryServiceClient inventoryServiceClient, IValidator<CreateProductDto> createValidator, IValidator<UpdateProductDto> updateValidator)
+        public ProductService(IProductRepository productRepository, ICategoryRepository categoryRepository, IInventoryServiceClient inventoryServiceClient, IValidator<CreateProductDto> createValidator, IValidator<UpdateProductDto> updateValidator)
         {
             _productRepository = productRepository;
             _inventoryServiceClient = inventoryServiceClient;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
@@ -53,8 +55,8 @@ namespace CatalogService.Application.Services
                 throw new ValidationException(validationResult.Errors);
             }
 
-            var categoryExists = await _productRepository.CategoryExistsAsync(dto.CategoryId);
-            if (!categoryExists)
+            var category = await _categoryRepository.GetCategoryByIdAsync(dto.CategoryId);
+            if (category == null)
             {
                 throw new NotFoundException("Category does not exist.");
             }
@@ -75,7 +77,8 @@ namespace CatalogService.Application.Services
                 Price = dto.Price,
                 ImageUrl = dto.ImageUrl,
                 IsActive = dto.IsActive,
-                CategoryId = dto.CategoryId
+                CategoryId = dto.CategoryId,
+                Category = category
             };
 
             await _productRepository.AddProductAsync(product);
@@ -108,8 +111,8 @@ namespace CatalogService.Application.Services
                 return null;
             }
 
-            var categoryExists = await _productRepository.CategoryExistsAsync(dto.CategoryId);
-            if (!categoryExists)
+            var category = await _categoryRepository.GetCategoryByIdAsync(dto.CategoryId);
+            if (category == null)
             {
                 throw new NotFoundException("Category does not exist.");
             }
@@ -128,6 +131,7 @@ namespace CatalogService.Application.Services
             existingProduct.ImageUrl = dto.ImageUrl;
             existingProduct.IsActive = dto.IsActive;
             existingProduct.CategoryId = dto.CategoryId;
+            existingProduct.Category = category;
 
             await _productRepository.SaveChangesAsync();
 
@@ -142,17 +146,17 @@ namespace CatalogService.Application.Services
                 return false;
             }
 
+            _productRepository.DeleteProduct(product);
+            await _productRepository.SaveChangesAsync();
+
             try
             {
                 await _inventoryServiceClient.DeleteInventoryItemByProductIdAsync(id);
             }
             catch (Exception)
             {
-                throw new ConflictException($"Cannot delete product {id} because inventory cleanup failed.");
+                throw new ConflictException($"Product {product.Name} was deleted, but inventory cleanup failed.");
             }
-
-            _productRepository.DeleteProduct(product);
-            await _productRepository.SaveChangesAsync();
 
             return true;
         }

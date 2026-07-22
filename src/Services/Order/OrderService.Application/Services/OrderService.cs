@@ -160,24 +160,43 @@ namespace OrderService.Application.Services
 
         private async Task<OrderDto> MapToDtoAsync(Order order)
         {
-            var orderItemDtos = new List<OrderItemDto>();
-
-            foreach (var item in order.OrderItems)
+            if (!order.OrderItems.Any())
             {
-                var product = await _catalogServiceClient.GetProductSnapshotByIdAsync(item.ProductId);
-
-                orderItemDtos.Add(new OrderItemDto
+                return new OrderDto
                 {
-                    Id = item.Id,
-                    ProductId = item.ProductId,
-                    ProductName = product?.Name ?? string.Empty,
-                    ProductImageUrl = product?.ImageUrl ?? string.Empty,
-                    Quantity = item.Quantity,
-                    PricePerUnit = item.PricePerUnit,
-                    TotalPrice = item.TotalPrice
-                });
+                    Id = order.Id,
+                    UserId = order.UserId,
+                    Status = order.Status.ToString(),
+                    TotalAmount = order.TotalAmount,
+                    Address = order.Address,
+                    City = order.City,
+                    PostalCode = order.PostalCode,
+                    Country = order.Country,
+                    CreatedAt = order.CreatedAt,
+                    UpdatedAt = order.UpdatedAt,
+                    OrderItems = new List<OrderItemDto>()
+                };
             }
 
+            // Create a task for every product fetch concurrently
+            var productTasks = order.OrderItems.Select(item =>
+                _catalogServiceClient.GetProductSnapshotByIdAsync(item.ProductId)
+            ).ToList();
+
+            // Wait for all product requests to finish simultaneously
+            var products = await Task.WhenAll(productTasks);
+
+            // Zip them together
+            var orderItemDtos = order.OrderItems.Zip(products, (item, product) => new OrderItemDto
+            {
+                Id = item.Id,
+                ProductId = item.ProductId,
+                ProductName = product?.Name ?? string.Empty,
+                ProductImageUrl = product?.ImageUrl ?? string.Empty,
+                Quantity = item.Quantity,
+                PricePerUnit = item.PricePerUnit,
+                TotalPrice = item.TotalPrice
+            }).ToList();
 
             return new OrderDto
             {

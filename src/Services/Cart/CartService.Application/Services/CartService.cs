@@ -171,23 +171,38 @@ namespace CartService.Application.Services
 
         private async Task<CartDto> MapToCartDtoAsync(Cart cart)
         {
-            var cartItemDtos = new List<CartItemDto>();
-
-            foreach (var item in cart.CartItems)
+            if (!cart.CartItems.Any())
             {
-                var product = await _catalogServiceClient.GetProductSnapshotByIdAsync(item.ProductId);
-
-                cartItemDtos.Add(new CartItemDto
+                return new CartDto
                 {
-                    Id = item.Id,
-                    ProductId = item.ProductId,
-                    ProductName = product?.Name ?? string.Empty,
-                    ProductImageUrl = product?.ImageUrl ?? string.Empty,
-                    Quantity = item.Quantity,
-                    PricePerUnit = item.PricePerUnit,
-                    TotalPrice = item.Quantity * item.PricePerUnit
-                });
+                    Id = cart.Id,
+                    UserId = cart.UserId,
+                    TotalAmount = cart.TotalAmount,
+                    CreatedAt = cart.CreatedAt,
+                    UpdatedAt = cart.UpdatedAt,
+                    CartItems = new List<CartItemDto>()
+                };
             }
+
+            // Create a task for every product fetch concurrently
+            var productTasks = cart.CartItems.Select(item =>
+                _catalogServiceClient.GetProductSnapshotByIdAsync(item.ProductId)
+            ).ToList();
+
+            // Wait for all HTTP requests to finish simultaneously
+            var products = await Task.WhenAll(productTasks);
+
+            // Map them together
+            var cartItemDtos = cart.CartItems.Zip(products, (item, product) => new CartItemDto
+            {
+                Id = item.Id,
+                ProductId = item.ProductId,
+                ProductName = product?.Name ?? string.Empty,
+                ProductImageUrl = product?.ImageUrl ?? string.Empty,
+                Quantity = item.Quantity,
+                PricePerUnit = item.PricePerUnit,
+                TotalPrice = item.Quantity * item.PricePerUnit
+            }).ToList();
 
             return new CartDto
             {
