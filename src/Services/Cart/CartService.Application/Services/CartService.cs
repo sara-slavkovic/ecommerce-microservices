@@ -14,14 +14,16 @@ namespace CartService.Application.Services
         private readonly ICartRepository _cartRepository;
         private readonly ICatalogServiceClient _catalogServiceClient;
         private readonly IInventoryServiceClient _inventoryServiceClient;
+        private readonly IUserServiceClient _userServiceClient;
         private readonly IValidator<CreateCartItemDto> _createValidator;
         private readonly IValidator<UpdateCartItemQuantityDto> _updateValidator;
 
-        public CartService(ICartRepository cartRepository, ICatalogServiceClient catalogServiceClient, IInventoryServiceClient inventoryServiceClient, IValidator<CreateCartItemDto> createValidator, IValidator<UpdateCartItemQuantityDto> updateValidator)
+        public CartService(ICartRepository cartRepository, ICatalogServiceClient catalogServiceClient, IInventoryServiceClient inventoryServiceClient, IUserServiceClient userServiceClient, IValidator<CreateCartItemDto> createValidator, IValidator<UpdateCartItemQuantityDto> updateValidator)
         {
             _cartRepository = cartRepository;
             _catalogServiceClient = catalogServiceClient;
             _inventoryServiceClient = inventoryServiceClient;
+            _userServiceClient = userServiceClient;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
         }
@@ -38,6 +40,12 @@ namespace CartService.Application.Services
             var validationResult = await _createValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
+
+            var user = await _userServiceClient.GetUserSnapshotByIdAsync(dto.UserId);
+            if (user == null)
+                throw new NotFoundException("User not found.");
+            if (!user.IsActive)
+                throw new BadRequestException("User account is not active.");
 
             var (product, inventory) = await GetProductAndInventoryAsync(dto.ProductId);
 

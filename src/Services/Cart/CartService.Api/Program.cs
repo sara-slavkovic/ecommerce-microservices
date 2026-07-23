@@ -30,6 +30,12 @@ builder.Services.AddHttpClient<CartService.Application.Interfaces.IInventoryServ
     client.DefaultRequestHeaders.Add("X-Internal-Api-Key", internalApiKey);
 });
 
+builder.Services.AddHttpClient<CartService.Application.Interfaces.IUserServiceClient, CartService.Infrastructure.Clients.UserServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Services:UserService"] ?? throw new InvalidOperationException("UserService URL is not configured."));
+    client.DefaultRequestHeaders.Add("X-Internal-Api-Key", internalApiKey);
+});
+
 builder.Services.AddValidatorsFromAssemblyContaining<CartService.Application.Validators.CreateCartItemDtoValidator>(ServiceLifetime.Transient);
 
 builder.Services.AddExceptionHandler<SharedKernel.Web.ExceptionHandlers.ValidationExceptionHandler>();

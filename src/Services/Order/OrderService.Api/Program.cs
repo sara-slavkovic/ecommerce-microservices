@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,7 +34,13 @@ builder.Services.AddHttpClient<OrderService.Application.Interfaces.IInventorySer
 
 builder.Services.AddHttpClient<OrderService.Application.Interfaces.ICatalogServiceClient, OrderService.Infrastructure.Clients.CatalogServiceClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["Services:CatalogService"] ?? throw new Exception("CatalogService URL is not configured."));
+    client.BaseAddress = new Uri(builder.Configuration["Services:CatalogService"] ?? throw new InvalidOperationException("CatalogService URL is not configured."));
+});
+
+builder.Services.AddHttpClient<OrderService.Application.Interfaces.IUserServiceClient, OrderService.Infrastructure.Clients.UserServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Services:UserService"] ?? throw new InvalidOperationException("UserService URL is not configured."));
+    client.DefaultRequestHeaders.Add("X-Internal-Api-Key", internalApiKey);
 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<OrderService.Application.Validators.CreateOrderDtoValidator>(ServiceLifetime.Transient);
