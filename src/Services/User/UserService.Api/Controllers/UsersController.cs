@@ -42,5 +42,13 @@ namespace UserService.Api.Controllers
             if (snapshot == null) return NotFound();
             return Ok(snapshot);
         }
+
+        [HttpPut("{id:guid}")]
+        [SwaggerOperation(Summary = "Update user")]
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto dto)
+        {
+            var user = await _userService.UpdateUserAsync(id, dto);
+            return Ok(user);
+        }
     }
 }

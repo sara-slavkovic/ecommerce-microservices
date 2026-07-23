@@ -32,6 +32,11 @@ namespace UserService.Infrastructure.Repositories
             return await _context.Users.AnyAsync(u => u.Username == username);
         }
 
+        public async Task<bool> ExistsByUsernameExcludingIdAsync(string username, Guid excludeId)
+        {
+            return await _context.Users.AnyAsync(u => u.Username == username && u.Id != excludeId);
+        }
+
         public async Task AddUserAsync(User user)
         {
             await _context.Users.AddAsync(user);

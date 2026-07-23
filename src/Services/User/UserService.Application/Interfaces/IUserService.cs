@@ -10,5 +10,6 @@ namespace UserService.Application.Interfaces
         Task<UserDto> RegisterAsync(RegisterUserDto dto);
         Task<UserDto> LoginAsync(LoginUserDto dto);
         Task<UserSnapshotDto?> GetUserSnapshotByIdAsync(Guid id);
+        Task<UserDto> UpdateUserAsync(Guid id, UpdateUserDto dto);
     }
 }
