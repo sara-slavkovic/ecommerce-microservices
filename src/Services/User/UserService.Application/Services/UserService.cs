@@ -82,7 +82,9 @@ namespace UserService.Application.Services
             return new UserSnapshotDto
             {
                 Id = user.Id,
-                IsActive = user.IsActive
+                IsActive = user.IsActive,
+                FullName = user.FullName,
+                Phone = user.Phone
             };
         }
 

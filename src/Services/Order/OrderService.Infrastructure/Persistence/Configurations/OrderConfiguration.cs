@@ -48,6 +48,14 @@ namespace OrderService.Infrastructure.Persistence.Configurations
                 .WithOne(oi => oi.Order)
                 .HasForeignKey(oi => oi.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(o => o.CustomerFullName)
+                .IsRequired()
+                .HasMaxLength(150);
+
+            builder.Property(o => o.CustomerPhone)
+                .IsRequired()
+                .HasMaxLength(30);
         }
     }
 }

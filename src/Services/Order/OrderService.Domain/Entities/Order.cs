@@ -11,6 +11,8 @@ namespace OrderService.Domain.Entities
         public Guid UserId { get; set; }
         public OrderStatus Status { get; set; }
         public decimal TotalAmount { get; set; }
+        public string CustomerFullName { get; set; } = string.Empty;
+        public string CustomerPhone { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
         public string PostalCode { get; set; } = string.Empty;
