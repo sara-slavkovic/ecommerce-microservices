@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Polly.CircuitBreaker;
+using Polly.Timeout;
 using SharedKernel.Domain.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -19,6 +21,13 @@ namespace SharedKernel.Web.ExceptionHandlers
                 BadRequestException => (StatusCodes.Status400BadRequest, "Bad Request", exception.Message),
                 ConflictException => (StatusCodes.Status409Conflict, "Conflict", exception.Message),
                 ServiceUnavailableException => (StatusCodes.Status503ServiceUnavailable, "Service Unavailable", exception.Message),
+
+                // polly exceptions
+                BrokenCircuitException => (StatusCodes.Status503ServiceUnavailable, "Service Paused", "A required downstream service is temporarily unavailable."),
+                TimeoutRejectedException => (StatusCodes.Status504GatewayTimeout, "Gateway Timeout", "The request to a downstream service timed out."),
+
+                //network exceptions
+                HttpRequestException or TaskCanceledException => (StatusCodes.Status503ServiceUnavailable, "Service Unreachable", "Unable to communicate with a required service."),
                 _ => (StatusCodes.Status500InternalServerError, "Server Error", "An unexpected error occurred.")
             };
 
