@@ -37,4 +37,10 @@
     <Project Path="src/SharedKernel/SharedKernel.Infrastructure/SharedKernel.Infrastructure.csproj" Id="dc4f79cd-cbfa-40d0-88fa-8b776a9dcaf3" />
     <Project Path="src/SharedKernel/SharedKernel.Web/SharedKernel.Web.csproj" Id="a2b49f84-b277-421e-9422-8a94275c6614" />
   </Folder>
+  <Folder Name="/User/">
+    <Project Path="src/Services/User/UserService.Api/UserService.Api.csproj" Id="e57f0b1c-fed4-4ebd-beea-1d81f43915b0" />
+    <Project Path="src/Services/User/UserService.Application/UserService.Application.csproj" Id="9ab7841e-ad81-40a7-8003-bc1d30434584" />
+    <Project Path="src/Services/User/UserService.Domain/UserService.Domain.csproj" Id="300b8a44-ebad-430d-902a-8e099ce532e3" />
+    <Project Path="src/Services/User/UserService.Infrastructure/UserService.Infrastructure.csproj" Id="ec9d7166-3dd3-4a90-91cc-74253e21069a" />
+  </Folder>
 </Solution>
