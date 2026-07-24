@@ -30,12 +30,12 @@ builder.Services.AddHttpClient<OrderService.Application.Interfaces.ICartServiceC
     options.Retry.Delay = TimeSpan.FromSeconds(1);
     options.Retry.UseJitter = true;
 
-    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(5);
-    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(20);
+    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(30);
+    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(60);
 
     options.CircuitBreaker.FailureRatio = 0.5;
     options.CircuitBreaker.MinimumThroughput = 4;
-    options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(10);
+    options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
     options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
 });
 
@@ -50,12 +50,12 @@ builder.Services.AddHttpClient<OrderService.Application.Interfaces.IInventorySer
     options.Retry.Delay = TimeSpan.FromSeconds(1);
     options.Retry.UseJitter = true;
 
-    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(5);
-    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(20);
+    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(30);
+    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(60);
 
     options.CircuitBreaker.FailureRatio = 0.5;
     options.CircuitBreaker.MinimumThroughput = 4;
-    options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(10);
+    options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
     options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
 });
 
@@ -69,12 +69,12 @@ builder.Services.AddHttpClient<OrderService.Application.Interfaces.ICatalogServi
     options.Retry.Delay = TimeSpan.FromSeconds(1);
     options.Retry.UseJitter = true;
 
-    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(5);
-    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(20);
+    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(30);
+    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(60);
 
     options.CircuitBreaker.FailureRatio = 0.5;
     options.CircuitBreaker.MinimumThroughput = 4;
-    options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(10);
+    options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
     options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
 });
 
@@ -89,12 +89,12 @@ builder.Services.AddHttpClient<OrderService.Application.Interfaces.IUserServiceC
     options.Retry.Delay = TimeSpan.FromSeconds(1);
     options.Retry.UseJitter = true;
 
-    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(5);
-    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(20);
+    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(30);
+    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(60);
 
     options.CircuitBreaker.FailureRatio = 0.5;
     options.CircuitBreaker.MinimumThroughput = 4;
-    options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(10);
+    options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
     options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
 });
 

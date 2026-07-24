@@ -20,6 +20,20 @@ builder.Services.AddScoped<PaymentService.Application.Interfaces.IPaymentService
 builder.Services.AddHttpClient<PaymentService.Application.Interfaces.IMockGatewayClient, PaymentService.Infrastructure.Clients.MockGatewayClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Services:MockPaymentGateway"] ?? throw new Exception("MockPaymentGateway URL is not configured."));
+}).AddStandardResilienceHandler(options =>
+{
+    options.Retry.MaxRetryAttempts = 3;
+    options.Retry.BackoffType = Polly.DelayBackoffType.Exponential;
+    options.Retry.Delay = TimeSpan.FromSeconds(1);
+    options.Retry.UseJitter = true;
+
+    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(3);
+    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(60);
+
+    options.CircuitBreaker.FailureRatio = 0.5;
+    options.CircuitBreaker.MinimumThroughput = 4;
+    options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
+    options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
 });
 
 var internalApiKey = builder.Configuration["InternalApiKey"] ?? throw new ArgumentNullException("InternalApiKey is missing");
@@ -28,6 +42,20 @@ builder.Services.AddHttpClient<PaymentService.Application.Interfaces.IOrderServi
 {
     client.BaseAddress = new Uri(builder.Configuration["Services:OrderService"] ?? throw new Exception("OrderService URL is not configured."));
     client.DefaultRequestHeaders.Add("X-Internal-Api-Key", internalApiKey);
+}).AddStandardResilienceHandler(options =>
+{
+    options.Retry.MaxRetryAttempts = 3;
+    options.Retry.BackoffType = Polly.DelayBackoffType.Exponential;
+    options.Retry.Delay = TimeSpan.FromSeconds(1);
+    options.Retry.UseJitter = true;
+
+    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(30);
+    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(60);
+
+    options.CircuitBreaker.FailureRatio = 0.5;
+    options.CircuitBreaker.MinimumThroughput = 4;
+    options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
+    options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<PaymentService.Application.Validators.InitiatePaymentDtoValidator>(ServiceLifetime.Transient);
