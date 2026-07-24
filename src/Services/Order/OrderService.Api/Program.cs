@@ -28,6 +28,7 @@ builder.Services.AddHttpClient<OrderService.Application.Interfaces.ICartServiceC
     options.Retry.MaxRetryAttempts = 3;
     options.Retry.BackoffType = Polly.DelayBackoffType.Exponential;
     options.Retry.Delay = TimeSpan.FromSeconds(1);
+    options.Retry.UseJitter = true;
 
     options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(5);
     options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(20);
@@ -47,6 +48,7 @@ builder.Services.AddHttpClient<OrderService.Application.Interfaces.IInventorySer
     options.Retry.MaxRetryAttempts = 3;
     options.Retry.BackoffType = Polly.DelayBackoffType.Exponential;
     options.Retry.Delay = TimeSpan.FromSeconds(1);
+    options.Retry.UseJitter = true;
 
     options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(5);
     options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(20);
@@ -65,6 +67,7 @@ builder.Services.AddHttpClient<OrderService.Application.Interfaces.ICatalogServi
     options.Retry.MaxRetryAttempts = 3;
     options.Retry.BackoffType = Polly.DelayBackoffType.Exponential;
     options.Retry.Delay = TimeSpan.FromSeconds(1);
+    options.Retry.UseJitter = true;
 
     options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(5);
     options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(20);
@@ -84,6 +87,7 @@ builder.Services.AddHttpClient<OrderService.Application.Interfaces.IUserServiceC
     options.Retry.MaxRetryAttempts = 3;
     options.Retry.BackoffType = Polly.DelayBackoffType.Exponential;
     options.Retry.Delay = TimeSpan.FromSeconds(1);
+    options.Retry.UseJitter = true;
 
     options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(5);
     options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(20);
