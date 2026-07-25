@@ -28,6 +28,21 @@ builder.Services.AddHttpClient<CatalogService.Application.Interfaces.IInventoryS
 {
     client.BaseAddress = new Uri(builder.Configuration["Services:InventoryService"] ?? throw new InvalidOperationException("InventoryService URL is not configured."));
     client.DefaultRequestHeaders.Add("X-Internal-Api-Key", internalApiKey);
+})
+.AddStandardResilienceHandler(options =>
+{
+    options.Retry.MaxRetryAttempts = 3;
+    options.Retry.BackoffType = Polly.DelayBackoffType.Exponential;
+    options.Retry.Delay = TimeSpan.FromSeconds(1);
+    options.Retry.UseJitter = true;
+
+    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(30);
+    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(60);
+
+    options.CircuitBreaker.FailureRatio = 0.5;
+    options.CircuitBreaker.MinimumThroughput = 4;
+    options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
+    options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<CatalogService.Application.Validators.CreateCategoryDtoValidator>(ServiceLifetime.Transient);
