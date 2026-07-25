@@ -11,5 +11,8 @@ namespace PaymentService.Application.DTOs
         public string TransactionId { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
         public int StatusCode { get; set; }
+
+        // Mock gateway client will return the tracked attempts here
+        public List<PaymentAttemptRecord> Attempts { get; set; } = new();
     }
 }

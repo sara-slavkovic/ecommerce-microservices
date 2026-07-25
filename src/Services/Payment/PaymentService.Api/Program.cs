@@ -17,10 +17,15 @@ builder.Services.AddDbContext<PaymentService.Infrastructure.Persistence.PaymentD
 builder.Services.AddScoped<PaymentService.Application.Interfaces.IPaymentRepository, PaymentService.Infrastructure.Repositories.PaymentRepository>();
 builder.Services.AddScoped<PaymentService.Application.Interfaces.IPaymentService, PaymentService.Application.Services.PaymentService>();
 
-builder.Services.AddHttpClient<PaymentService.Application.Interfaces.IMockGatewayClient, PaymentService.Infrastructure.Clients.MockGatewayClient>(client =>
+builder.Services.AddTransient<PaymentService.Infrastructure.Handlers.PaymentAttemptTrackingHandler>();
+
+// 1. Assign the HttpClientBuilder to a variable
+var mockGatewayClientBuilder = builder.Services.AddHttpClient<PaymentService.Application.Interfaces.IMockGatewayClient, PaymentService.Infrastructure.Clients.MockGatewayClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Services:MockPaymentGateway"] ?? throw new Exception("MockPaymentGateway URL is not configured."));
-}).AddStandardResilienceHandler(options =>
+});
+// 2. Add Resilience to the builder (Outer layer: handles the retry loop)
+mockGatewayClientBuilder.AddStandardResilienceHandler(options =>
 {
     options.Retry.MaxRetryAttempts = 3;
     options.Retry.BackoffType = Polly.DelayBackoffType.Exponential;
@@ -35,6 +40,8 @@ builder.Services.AddHttpClient<PaymentService.Application.Interfaces.IMockGatewa
     options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
     options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
 });
+// 3. Add Tracking Handler to the builder (Inner layer: executes on every single retry attempt)
+mockGatewayClientBuilder.AddHttpMessageHandler<PaymentService.Infrastructure.Handlers.PaymentAttemptTrackingHandler>();
 
 var internalApiKey = builder.Configuration["InternalApiKey"] ?? throw new ArgumentNullException("InternalApiKey is missing");
 

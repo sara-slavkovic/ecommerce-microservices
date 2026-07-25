@@ -58,20 +58,19 @@ namespace PaymentService.Application.Services
 
             // one payment try
             var idempotencyKey = Guid.NewGuid().ToString();
-            var startedAt = DateTime.Now;
 
+            // 1. Call Gateway (Polly executes retries inside the HttpClient pipeline)
             var chargeResult = await _mockGatewayClient.ChargeAsync(new ChargeRequestDto
             {
                 OrderId = dto.OrderId,
                 Amount = dto.Amount,
                 IdempotencyKey = idempotencyKey,
-                SimulationMode = "Random"
-                //SimulationMode = "FailNTimesThenSucceed",
-                //FailCount = 2
+                //SimulationMode = "Random"
+                SimulationMode = "FailNTimesThenSucceed",
+                FailCount = 2
             });
 
-            var finishedAt = DateTime.Now;
-
+            // 2. Build Payment aggregate
             var paymentId = Guid.NewGuid();
             var payment = new Payment
             {
@@ -84,20 +83,23 @@ namespace PaymentService.Application.Services
                 PaymentAttempts = new List<PaymentAttempt>()
             };
 
-            var attempt = new PaymentAttempt
+            // 3. Map the attempts directly from the DTO
+            foreach (var rec in chargeResult.Attempts)
             {
-                Id = Guid.NewGuid(),
-                PaymentId = paymentId,
-                AttemptNumber = 1,
-                StatusCode = chargeResult.StatusCode,
-                ErrorMessage = chargeResult.Success ? null : chargeResult.Message,
-                StartedAt = startedAt,
-                FinishedAt = finishedAt,
-                DurationMs = (int)(finishedAt - startedAt).TotalMilliseconds
-            };
+                payment.PaymentAttempts.Add(new PaymentAttempt
+                {
+                    Id = Guid.NewGuid(),
+                    PaymentId = paymentId,
+                    AttemptNumber = rec.AttemptNumber,
+                    StatusCode = rec.StatusCode,
+                    ErrorMessage = rec.ErrorMessage,
+                    StartedAt = rec.StartedAt,
+                    FinishedAt = rec.FinishedAt,
+                    DurationMs = rec.DurationMs
+                });
+            }
 
-            payment.PaymentAttempts.Add(attempt);
-
+            // 4. Save to Database cleanly in application layer
             await _paymentRepository.AddPaymentAsync(payment);
             await _paymentRepository.SaveChangesAsync();
 
