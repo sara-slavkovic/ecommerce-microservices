@@ -19,7 +19,12 @@ builder.Services.AddScoped<CartService.Application.Interfaces.ICartService, Cart
 
 var internalApiKey = builder.Configuration["InternalApiKey"] ?? throw new ArgumentNullException("InternalApiKey is missing");
 
-builder.Services.AddHttpClient<CartService.Application.Interfaces.ICatalogServiceClient, CartService.Infrastructure.Clients.CatalogServiceClient>(client =>
+// 1. Add Memory Cache to the container
+builder.Services.AddMemoryCache();
+
+// 2. Register the raw HTTP client using just the concrete class
+// This keeps exact Polly resilience pipeline attached to the real network calls
+builder.Services.AddHttpClient<CartService.Infrastructure.Clients.CatalogServiceClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Services:CatalogService"] ?? throw new InvalidOperationException("CatalogService URL is not configured."));
 })
@@ -37,6 +42,18 @@ builder.Services.AddHttpClient<CartService.Application.Interfaces.ICatalogServic
     options.CircuitBreaker.MinimumThroughput = 4;
     options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
     options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
+});
+
+// 3. Register the Interface to use the Cache Decorator, passing the raw client inside it
+builder.Services.AddScoped<CartService.Application.Interfaces.ICatalogServiceClient>(provider =>
+{
+    // Get the raw HTTP client (with Polly attached)
+    var rawClient = provider.GetRequiredService<CartService.Infrastructure.Clients.CatalogServiceClient>();
+    // Get the Memory Cache
+    var cache = provider.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
+
+    // Return the decorator
+    return new CartService.Infrastructure.Clients.CachedCatalogServiceClient(rawClient, cache);
 });
 
 builder.Services.AddHttpClient<CartService.Application.Interfaces.IInventoryServiceClient, CartService.Infrastructure.Clients.InventoryServiceClient>(client =>
