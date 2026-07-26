@@ -51,9 +51,11 @@ builder.Services.AddScoped<CartService.Application.Interfaces.ICatalogServiceCli
     var rawClient = provider.GetRequiredService<CartService.Infrastructure.Clients.CatalogServiceClient>();
     // Get the Memory Cache
     var cache = provider.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
+    // Get the Logger
+    var logger = provider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<CartService.Infrastructure.Clients.CachedCatalogServiceClient>>();
 
     // Return the decorator
-    return new CartService.Infrastructure.Clients.CachedCatalogServiceClient(rawClient, cache);
+    return new CartService.Infrastructure.Clients.CachedCatalogServiceClient(rawClient, cache, logger);
 });
 
 builder.Services.AddHttpClient<CartService.Application.Interfaces.IInventoryServiceClient, CartService.Infrastructure.Clients.InventoryServiceClient>(client =>
