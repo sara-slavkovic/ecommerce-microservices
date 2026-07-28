@@ -11,6 +11,13 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.EnableAnnotations();
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173").AllowAnyMethod().AllowAnyHeader();
+    });
+});
 
 builder.Services.AddDbContext<OrderService.Infrastructure.Persistence.OrderDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("OrderDatabase")));
 
@@ -114,6 +121,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseExceptionHandler();
+
+app.UseCors("AllowReactApp");
 
 app.UseHttpsRedirection();
 
