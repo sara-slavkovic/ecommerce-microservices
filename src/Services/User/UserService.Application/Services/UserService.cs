@@ -123,6 +123,12 @@ namespace UserService.Application.Services
             return MapToDto(user);
         }
 
+        public async Task<List<UserDto>> GetAllUsersAsync()
+        {
+            var users = await _userRepository.GetAllUsersAsync();
+            return users.Select(MapToDto).ToList();
+        }
+
         private static UserDto MapToDto(User user)
         {
             return new UserDto

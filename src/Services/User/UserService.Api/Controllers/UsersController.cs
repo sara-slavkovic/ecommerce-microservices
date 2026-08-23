@@ -50,5 +50,13 @@ namespace UserService.Api.Controllers
             var user = await _userService.UpdateUserAsync(id, dto);
             return Ok(user);
         }
+
+        [HttpGet]
+        [SwaggerOperation(Summary = "Get all users")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _userService.GetAllUsersAsync();
+            return Ok(users);
+        }
     }
 }

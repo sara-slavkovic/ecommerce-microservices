@@ -11,5 +11,6 @@ namespace UserService.Application.Interfaces
         Task<UserDto> LoginAsync(LoginUserDto dto);
         Task<UserSnapshotDto?> GetUserSnapshotByIdAsync(Guid id);
         Task<UserDto> UpdateUserAsync(Guid id, UpdateUserDto dto);
+        Task<List<UserDto>> GetAllUsersAsync();
     }
 }

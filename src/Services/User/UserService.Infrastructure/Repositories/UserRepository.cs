@@ -27,6 +27,11 @@ namespace UserService.Infrastructure.Repositories
             return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
 
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            return await _context.Users.ToListAsync();
+        }
+
         public async Task<bool> ExistsByUsernameAsync(string username)
         {
             return await _context.Users.AnyAsync(u => u.Username == username);

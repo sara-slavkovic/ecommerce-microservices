@@ -9,6 +9,7 @@ namespace UserService.Application.Interfaces
     {
         Task<User?> GetUserByIdAsync(Guid id);
         Task<User?> GetUserByUsernameAsync(string username);
+        Task<List<User>> GetAllUsersAsync();
         Task<bool> ExistsByUsernameAsync(string username);
         Task<bool> ExistsByUsernameExcludingIdAsync(string username, Guid excludeId);
         Task AddUserAsync(User user);
