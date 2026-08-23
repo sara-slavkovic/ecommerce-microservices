@@ -21,6 +21,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<PaymentService.Infrastructure.Persistence.PaymentDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("PaymentDatabase")));
 
+builder.Services.Configure<PaymentService.Application.Settings.PaymentSimulationSettings>(builder.Configuration.GetSection("PaymentSimulation"));
+
 builder.Services.AddScoped<PaymentService.Application.Interfaces.IPaymentRepository, PaymentService.Infrastructure.Repositories.PaymentRepository>();
 builder.Services.AddScoped<PaymentService.Application.Interfaces.IPaymentService, PaymentService.Application.Services.PaymentService>();
 

@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
+using Microsoft.Extensions.Options;
 using PaymentService.Application.DTOs;
 using PaymentService.Application.Interfaces;
+using PaymentService.Application.Settings;
 using PaymentService.Domain.Entities;
 using PaymentService.Domain.Enums;
 using SharedKernel.Domain.Exceptions;
@@ -16,13 +18,15 @@ namespace PaymentService.Application.Services
         private readonly IMockGatewayClient _mockGatewayClient;
         private readonly IOrderServiceClient _orderServiceClient;
         private readonly IValidator<InitiatePaymentDto> _initiateValidator;
+        private readonly PaymentSimulationSettings _simulationSettings;
 
-        public PaymentService(IPaymentRepository paymentRepository, IMockGatewayClient mockGatewayClient, IOrderServiceClient orderServiceClient, IValidator<InitiatePaymentDto> initiateValidator)
+        public PaymentService(IPaymentRepository paymentRepository, IMockGatewayClient mockGatewayClient, IOrderServiceClient orderServiceClient, IValidator<InitiatePaymentDto> initiateValidator, IOptionsSnapshot<PaymentSimulationSettings> simulationSettings)
         {
             _paymentRepository = paymentRepository;
             _mockGatewayClient = mockGatewayClient;
             _orderServiceClient = orderServiceClient;
             _initiateValidator = initiateValidator;
+            _simulationSettings = simulationSettings.Value;
         }
 
         public async Task<PaymentDto?> GetPaymentByIdAsync(Guid id)
@@ -66,8 +70,10 @@ namespace PaymentService.Application.Services
                 Amount = dto.Amount,
                 IdempotencyKey = idempotencyKey,
                 //SimulationMode = "Random"
-                SimulationMode = "FailNTimesThenSucceed",
-                FailCount = 2
+                //SimulationMode = "FailNTimesThenSucceed",
+                //FailCount = 2
+                SimulationMode = _simulationSettings.Mode,
+                FailCount = _simulationSettings.FailCount
             });
 
             // 2. Build Payment aggregate
