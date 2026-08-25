@@ -33,6 +33,7 @@ TestResult.xml
 nunit-*.xml
 .vs/
 *.slnLaunch.user
+tests/PerformanceTests/reports/
 
 # ==========================================
 # Node.js / React (Frontend) Ignores

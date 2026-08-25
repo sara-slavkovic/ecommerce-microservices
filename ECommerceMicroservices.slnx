@@ -43,4 +43,5 @@
     <Project Path="src/Services/User/UserService.Domain/UserService.Domain.csproj" Id="300b8a44-ebad-430d-902a-8e099ce532e3" />
     <Project Path="src/Services/User/UserService.Infrastructure/UserService.Infrastructure.csproj" Id="ec9d7166-3dd3-4a90-91cc-74253e21069a" />
   </Folder>
+  <Project Path="tests/PerformanceTests/PerformanceTests.csproj" Id="e1955ca6-5924-4e30-b126-a7c3d2f77185" />
 </Solution>
