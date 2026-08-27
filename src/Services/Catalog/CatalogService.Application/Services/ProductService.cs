@@ -142,12 +142,7 @@ namespace CatalogService.Application.Services
         {
             var product = await _productRepository.GetProductByIdAsync(id);
             if (product == null)
-            {
                 return false;
-            }
-
-            _productRepository.DeleteProduct(product);
-            await _productRepository.SaveChangesAsync();
 
             try
             {
@@ -155,8 +150,11 @@ namespace CatalogService.Application.Services
             }
             catch (Exception)
             {
-                throw new ConflictException($"Product {product.Name} was deleted, but inventory cleanup failed.");
+                throw new ConflictException($"Cannot delete product {product.Name}. Inventory cleanup failed; product was not deleted.");
             }
+
+            _productRepository.DeleteProduct(product);
+            await _productRepository.SaveChangesAsync();
 
             return true;
         }

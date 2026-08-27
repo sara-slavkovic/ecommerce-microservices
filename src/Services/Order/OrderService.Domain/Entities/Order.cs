@@ -19,6 +19,9 @@ namespace OrderService.Domain.Entities
         public string Country { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public bool IsInventoryConfirmed { get; set; } = false;
+        public bool IsCartDeleted { get; set; } = false;
+        public bool IsStockReleased { get; set; } = false;
 
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }

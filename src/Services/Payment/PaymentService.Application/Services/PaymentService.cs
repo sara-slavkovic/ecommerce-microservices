@@ -51,7 +51,16 @@ namespace PaymentService.Application.Services
 
             var existingPayment = await _paymentRepository.GetPaymentByOrderIdAsync(dto.OrderId);
             if (existingPayment != null)
+            {
+                if (existingPayment.Status == PaymentStatus.Succeeded)
+                {
+                    // The payment succeeded, but the OrderService client has failed (CompleteOrderAsync call failed)
+                    // Because CompleteOrderAsync is idempotent, we can safely call it again
+                    await _orderServiceClient.CompleteOrderAsync(dto.OrderId);
+                    return MapToDto(existingPayment);
+                }
                 throw new ConflictException("Payment for this order already exists.");
+            }
 
             var order = await _orderServiceClient.GetOrderByIdAsync(dto.OrderId);
             if (order == null)

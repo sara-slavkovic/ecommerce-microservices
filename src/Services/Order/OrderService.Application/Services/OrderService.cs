@@ -64,32 +64,6 @@ namespace OrderService.Application.Services
             if (cart == null || !cart.CartItems.Any())
                 throw new BadRequestException("Cart is empty or does not exist.");
 
-            var reservedItems = new List<CartItemSnapshotDto>();
-            try
-            { // reserve stock for every cart item
-                foreach (var item in cart.CartItems)
-                {
-                    await _inventoryServiceClient.ReserveStockAsync(new InventoryChangeDto
-                    {
-                        ProductId = item.ProductId,
-                        Quantity = item.Quantity
-                    });
-                    reservedItems.Add(item);
-                }
-            }
-            catch
-            {
-                foreach (var reserved in reservedItems)
-                {
-                    await _inventoryServiceClient.ReleaseStockAsync(new InventoryChangeDto
-                    {
-                        ProductId = reserved.ProductId,
-                        Quantity = reserved.Quantity
-                    });
-                }
-                throw new ConflictException("Failed to reserve stock. Order creation has been rolled back.");
-            }
-
             var order = new Order
             {
                 Id = Guid.NewGuid(),
@@ -114,8 +88,35 @@ namespace OrderService.Application.Services
                 }).ToList()
             };
 
-            await _orderRepository.AddOrderAsync(order);
-            await _orderRepository.SaveChangesAsync();
+            var reservedItems = new List<CartItemSnapshotDto>();
+            try
+            { // reserve stock for every cart item
+                foreach (var item in cart.CartItems)
+                {
+                    await _inventoryServiceClient.ReserveStockAsync(new InventoryChangeDto
+                    {
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity
+                    });
+                    reservedItems.Add(item);
+                }
+
+                //save order
+                await _orderRepository.AddOrderAsync(order);
+                await _orderRepository.SaveChangesAsync();
+            }
+            catch
+            {
+                foreach (var reserved in reservedItems)
+                {
+                    await _inventoryServiceClient.ReleaseStockAsync(new InventoryChangeDto
+                    {
+                        ProductId = reserved.ProductId,
+                        Quantity = reserved.Quantity
+                    });
+                }
+                throw new ConflictException("Failed to create order. Reserved stock has been rolled back.");
+            }
 
             return await MapToDtoAsync(order);
         }
@@ -126,23 +127,44 @@ namespace OrderService.Application.Services
             if (order == null)
                 throw new NotFoundException("Order not found.");
 
-            if (order.Status != OrderStatus.Pending)
+            // If NBomber retries a request that already fully succeeded, return safely
+            if (order.Status == OrderStatus.Paid && order.IsInventoryConfirmed && order.IsCartDeleted)
+                return;
+
+            // Only allow processing if Pending or if it's already Paid but incomplete
+            if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Paid)
                 throw new ConflictException($"Order cannot be completed. Current status: {order.Status}.");
 
-            foreach (var item in order.OrderItems)
+            // Save the payment state immediately
+            // Only update to Paid if it hasn't been done yet
+            if (order.Status != OrderStatus.Paid)
             {
-                await _inventoryServiceClient.ConfirmStockDeductionAsync(new InventoryChangeDto
-                {
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity
-                });
+                order.Status = OrderStatus.Paid;
+                order.UpdatedAt = DateTime.Now;
+                await _orderRepository.SaveChangesAsync();
             }
 
-            await _cartServiceClient.DeleteCartAsync(order.UserId);
+            if (!order.IsInventoryConfirmed)
+            {
+                foreach (var item in order.OrderItems)
+                {
+                    await _inventoryServiceClient.ConfirmStockDeductionAsync(new InventoryChangeDto
+                    {
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity
+                    });
+                }
+                order.IsInventoryConfirmed = true;
+                await _orderRepository.SaveChangesAsync();
+            }
 
-            order.Status = OrderStatus.Paid;
-            order.UpdatedAt = DateTime.Now;
-            await _orderRepository.SaveChangesAsync();
+            if (!order.IsCartDeleted)
+            {
+                await _cartServiceClient.DeleteCartAsync(order.UserId);
+
+                order.IsCartDeleted = true;
+                await _orderRepository.SaveChangesAsync();
+            }
         }
 
         public async Task CancelOrderAsync(Guid orderId)
@@ -151,21 +173,32 @@ namespace OrderService.Application.Services
             if (order == null)
                 throw new NotFoundException("Order not found.");
 
-            if (order.Status != OrderStatus.Pending)
+            if (order.Status == OrderStatus.Cancelled && order.IsStockReleased)
+                return;
+
+            if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Cancelled)
                 throw new ConflictException($"Order cannot be cancelled. Current status: {order.Status}.");
 
-            foreach (var item in order.OrderItems)
+            if (order.Status != OrderStatus.Cancelled)
             {
-                await _inventoryServiceClient.ReleaseStockAsync(new InventoryChangeDto
-                {
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity
-                });
+                order.Status = OrderStatus.Cancelled;
+                order.UpdatedAt = DateTime.Now;
+                await _orderRepository.SaveChangesAsync();
             }
 
-            order.Status = OrderStatus.Cancelled;
-            order.UpdatedAt = DateTime.Now;
-            await _orderRepository.SaveChangesAsync();
+            if (!order.IsStockReleased)
+            {
+                foreach (var item in order.OrderItems)
+                {
+                    await _inventoryServiceClient.ReleaseStockAsync(new InventoryChangeDto
+                    {
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity
+                    });
+                }
+                order.IsStockReleased = true;
+                await _orderRepository.SaveChangesAsync();
+            }
         }
 
         private async Task<OrderDto> MapToDtoAsync(Order order)
