@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { userApi } from '../api/axiosInstances';
+import { login } from '../api/userService';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
@@ -13,9 +13,9 @@ function Login() {
     e.preventDefault();
     setError('');
     try {
-      const res = await userApi.post('/users/login', { username, password });
-      localStorage.setItem('user', JSON.stringify(res.data));
-      setMessage(`Welcome back, ${res.data.fullName}! ✨`);
+      const user = await login({ username, password });
+      localStorage.setItem('user', JSON.stringify(user));
+      setMessage(`Welcome back, ${user.fullName}! ✨`);
       setTimeout(() => navigate('/home'), 1200);
     } catch (err) {
       setError('Invalid username or password');

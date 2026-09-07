@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { userApi } from '../api/axiosInstances';
+import { register } from '../api/userService';
 import { useNavigate } from 'react-router-dom';
 
 function Register() {
@@ -14,7 +14,7 @@ function Register() {
     e.preventDefault();
     setError('');
     try {
-      await userApi.post('/users/register', formData);
+      await register(formData);
       setMessage('Account created! Redirecting to login...');
       setTimeout(() => navigate('/login'), 1200);
     } catch (err) {
