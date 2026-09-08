@@ -1,7 +1,7 @@
-function ProductCard({ product }) {
-  const imageUrl = product.imageUrl && product.imageUrl.startsWith('images')
-    ? `https://localhost:7038/${product.imageUrl}`
-    : 'https://via.placeholder.com/230?text=No+Image';
+import { getImageUrl } from '../api/catalogService';
+
+function ProductCard({ product, onAddToCart }) {
+  const imageUrl = getImageUrl(product.imageUrl);
 
   return (
     <div style={{
@@ -15,7 +15,7 @@ function ProductCard({ product }) {
       <h3 style={{ margin: '15px 0 5px 0' }}>{product.name}</h3>
       <p style={{ margin: '0 0 10px 0', fontStyle: 'italic' }}>{product.brand}</p>
       <h3 style={{ margin: '0 0 15px 0' }}>${product.price.toFixed(2)}</h3>
-      <button style={{ width: '100%' }}>Add to Cart</button>
+      <button style={{ width: '100%' }} onClick={() => onAddToCart(product)}>Add to Cart</button>
     </div>
   );
 }

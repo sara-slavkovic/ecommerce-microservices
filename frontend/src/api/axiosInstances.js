@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const PORTS = {
+export const PORTS = {
   USER: '7082',
   CATALOG: '7038',
   CART: '7252',

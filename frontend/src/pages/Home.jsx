@@ -2,8 +2,12 @@ import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import { getAllProducts } from '../api/catalogService';
+import { addItemToCart } from '../api/cartService';
+import { useAuth } from '../hooks/useAuth';
 
 function Home() {
+  const { user } = useAuth();
+
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
 
@@ -13,6 +17,16 @@ function Home() {
       .catch(err => setError(err.message));
   }, []);
 
+    const handleAddToCart = async (product) => {
+    try {
+      await addItemToCart(user.id, product.id, 1);
+      alert(`${product.name} added to cart!`);
+    } catch (err) {
+      alert('Failed to add to cart.');
+      console.error(err);
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh' }}>
       <Navbar />
@@ -21,7 +35,7 @@ function Home() {
         {error && <p style={{ textAlign: 'center', color: '#b33' }}>Error: {error}</p>}
         {!error && products.length === 0 && <p style={{ textAlign: 'center' }}>Loading products...</p>}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '20px' }}>
-          {products.map(p => <ProductCard key={p.id} product={p} />)}
+          {products.map(p => <ProductCard key={p.id} product={p} onAddToCart={handleAddToCart} />)}
         </div>
       </div>
     </div>

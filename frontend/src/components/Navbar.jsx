@@ -1,4 +1,5 @@
 import { useAuth } from '../hooks/useAuth';
+import { Link } from 'react-router-dom';
 
 function Navbar() {
   const { user, logout } = useAuth();
@@ -12,8 +13,11 @@ function Navbar() {
       backgroundColor: 'var(--card-bg)',
       borderBottom: '1px solid var(--accent)'
     }}>
-      <h2 style={{ margin: 0 }}>Beauty Store</h2>
+      <Link to="/home" style={{ textDecoration: 'none' }}>
+        <h2 style={{ margin: 0 }}>Beauty Store</h2>
+      </Link>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <Link to="/cart">Cart</Link>
         <span style={{ fontWeight: 'bold' }}>{user?.fullName}</span>
         <button onClick={logout} style={{ padding: '6px 16px', fontSize: '0.9rem' }}>Logout</button>
       </div>
