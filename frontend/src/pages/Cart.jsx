@@ -9,6 +9,7 @@ import {
 import { getImageUrl } from "../api/catalogService";
 import { getErrorMessage } from "../api/errorHandling";
 import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 function Cart() {
   const { user } = useAuth();
@@ -16,6 +17,7 @@ function Cart() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     getCartByUserId(user.id)
@@ -191,6 +193,7 @@ function Cart() {
             <div style={{ textAlign: "right", marginTop: "20px" }}>
               <h2>Total: ${total.toFixed(2)}</h2>
               <button
+                onClick={() => navigate("/checkout")}
                 style={{
                   fontSize: "1.2rem",
                   padding: "15px 30px",
