@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { login } from "../api/userService";
-import { useNavigate } from "react-router-dom";
 import { getErrorMessage } from "../api/errorHandling";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -19,7 +19,12 @@ function Login() {
       setMessage(`Welcome back, ${user.fullName}! ✨`);
       setTimeout(() => navigate("/home"), 1200);
     } catch (err) {
-      setError(getErrorMessage(err, "Invalid username or password."));
+      setError(
+        getErrorMessage(
+          err,
+          "Login currently unavailable. Please try again soon.",
+        ),
+      );
     }
   };
 

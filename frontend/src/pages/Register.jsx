@@ -25,7 +25,12 @@ function Register() {
       setMessage("Account created! Redirecting to login...");
       setTimeout(() => navigate("/login"), 1200);
     } catch (err) {
-      setError(getErrorMessage(err, "Registration failed. Please try again."));
+      setError(
+        getErrorMessage(
+          err,
+          "Registration currently unavailable. Please try again soon.",
+        ),
+      );
     }
   };
 
