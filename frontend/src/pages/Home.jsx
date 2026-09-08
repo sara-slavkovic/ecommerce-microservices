@@ -5,9 +5,11 @@ import { getAllProducts } from "../api/catalogService";
 import { addItemToCart } from "../api/cartService";
 import { getErrorMessage } from "../api/errorHandling";
 import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/useToast";
 
 function Home() {
   const { user } = useAuth();
+  const showToast = useToast();
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,9 +31,9 @@ function Home() {
   const handleAddToCart = async (product) => {
     try {
       await addItemToCart(user.id, product.id, 1);
-      alert(`${product.name} added to cart!`);
+      showToast(`${product.name} added to cart!`, "success");
     } catch (err) {
-      alert(getErrorMessage(err, "Failed to add to cart."));
+      showToast(getErrorMessage(err, "Failed to add to cart."), "error");
     }
   };
 
