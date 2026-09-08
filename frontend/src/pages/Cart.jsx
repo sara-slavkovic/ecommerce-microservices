@@ -7,6 +7,7 @@ import {
   updateCartItemQuantity,
 } from "../api/cartService";
 import { getImageUrl } from "../api/catalogService";
+import { getErrorMessage } from "../api/errorHandling";
 import { useAuth } from "../hooks/useAuth";
 
 function Cart() {
@@ -23,7 +24,12 @@ function Cart() {
         if (err.response?.status === 404) {
           setCart({ cartItems: [] });
         } else {
-          setError(err.message);
+          setError(
+            getErrorMessage(
+              err,
+              "Cart is currently unavailable. Thanks for your patience!",
+            ),
+          );
         }
       })
       .finally(() => setLoading(false));
@@ -39,7 +45,7 @@ function Cart() {
         ),
       }));
     } catch (err) {
-      alert("Failed to remove item.");
+      alert(getErrorMessage(err, "Failed to remove item."));
     }
   };
 
@@ -59,7 +65,7 @@ function Cart() {
         ),
       }));
     } catch (err) {
-      alert("Failed to update quantity.");
+      alert(getErrorMessage(err, "Failed to update quantity."));
     } finally {
       // Forces QuantityInput to remount and re-sync with the real (current) quantity, whether the update succeeded or failed.
       setRefreshKey((prev) => prev + 1);
@@ -68,14 +74,30 @@ function Cart() {
 
   if (loading)
     return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>
-        Loading cart...
+      <div style={{ minHeight: "100vh" }}>
+        <Navbar />
+        <div style={{ padding: "4rem 2rem", textAlign: "center" }}>
+          Loading cart...
+        </div>
       </div>
     );
   if (error)
     return (
-      <div style={{ padding: "2rem", textAlign: "center", color: "#b33" }}>
-        Error: {error}
+      <div style={{ minHeight: "100vh" }}>
+        <Navbar />
+        <div
+          style={{
+            maxWidth: "500px",
+            margin: "80px auto",
+            padding: "30px",
+            backgroundColor: "var(--card-bg)",
+            borderRadius: "8px",
+            textAlign: "center",
+          }}
+        >
+          <h2 style={{ marginTop: 0 }}>Oops!</h2>
+          <p>{error}</p>
+        </div>
       </div>
     );
 
