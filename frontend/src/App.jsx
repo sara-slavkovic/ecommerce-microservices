@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
+import ProductDetails from "./pages/ProductDetails";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ToastProvider } from "./hooks/useToast";
 import { CartProvider } from "./hooks/useCart";
