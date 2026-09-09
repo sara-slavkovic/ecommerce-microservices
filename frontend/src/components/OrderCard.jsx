@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { getImageUrl } from "../api/catalogService";
+import { Link } from "react-router-dom";
 
 const STATUS_COLORS = {
   Created: "#8a8a8a",
@@ -65,13 +66,16 @@ function OrderCard({ order }) {
           }}
         >
           {order.orderItems.map((item) => (
-            <div
+            <Link
               key={item.id}
+              to={`/product/${item.productId}`}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "1rem",
                 padding: "8px 0",
+                textDecoration: "none",
+                color: "inherit",
               }}
             >
               <img
@@ -93,7 +97,7 @@ function OrderCard({ order }) {
               <p style={{ margin: 0, fontWeight: "bold" }}>
                 ${item.totalPrice.toFixed(2)}
               </p>
-            </div>
+            </Link>
           ))}
           <div
             style={{

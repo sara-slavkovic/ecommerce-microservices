@@ -12,6 +12,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../hooks/useToast";
 import { useCart } from "../hooks/useCart";
+import { Link, useNavigate } from "react-router-dom";
 
 function Cart() {
   const { user } = useAuth();
@@ -154,28 +155,33 @@ function Cart() {
                       gap: "1rem",
                     }}
                   >
-                    <img
-                      src={imageUrl}
-                      alt={item.productName}
+                    <Link
+                      to={`/product/${item.productId}`}
                       style={{
-                        width: "60px",
-                        height: "60px",
-                        objectFit: "cover",
-                        borderRadius: "5px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "1rem",
+                        textDecoration: "none",
+                        color: "inherit",
                       }}
-                    />
-                    <div>
-                      <h3 style={{ margin: "0 0 8px 0" }}>
-                        {item.productName}
-                      </h3>
-                      <QuantityInput
-                        key={`${item.id}-${refreshKey}`}
-                        initialQuantity={item.quantity}
-                        onChange={(newQty) =>
-                          handleQuantityChange(item, newQty)
-                        }
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={item.productName}
+                        style={{
+                          width: "60px",
+                          height: "60px",
+                          objectFit: "cover",
+                          borderRadius: "5px",
+                        }}
                       />
-                    </div>
+                      <h3 style={{ margin: 0 }}>{item.productName}</h3>
+                    </Link>
+                    <QuantityInput
+                      key={`${item.id}-${refreshKey}`}
+                      initialQuantity={item.quantity}
+                      onChange={(newQty) => handleQuantityChange(item, newQty)}
+                    />
                   </div>
                   <div
                     style={{
