@@ -15,6 +15,8 @@ function ProductCard({ product, onAddToCart }) {
         textAlign: "center",
         boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
         cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <img
@@ -31,16 +33,18 @@ function ProductCard({ product, onAddToCart }) {
       <p style={{ margin: "0 0 10px 0", fontStyle: "italic" }}>
         {product.brand}
       </p>
-      <h3 style={{ margin: "0 0 15px 0" }}>${product.price.toFixed(2)}</h3>
-      <button
-        style={{ width: "100%" }}
-        onClick={(e) => {
-          e.stopPropagation();
-          onAddToCart(product);
-        }}
-      >
-        Add to Cart
-      </button>
+      <div style={{ marginTop: "auto" }}>
+        <h3 style={{ margin: "0 0 15px 0" }}>${product.price.toFixed(2)}</h3>
+        <button
+          style={{ width: "100%" }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddToCart(product);
+          }}
+        >
+          Add to Cart
+        </button>
+      </div>
     </div>
   );
 }

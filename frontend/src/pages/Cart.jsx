@@ -12,7 +12,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../hooks/useToast";
 import { useCart } from "../hooks/useCart";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function Cart() {
   const { user } = useAuth();
