@@ -1,5 +1,7 @@
 ﻿using PaymentService.Application.DTOs;
 using PaymentService.Application.Interfaces;
+using Polly.CircuitBreaker;
+using Polly.Timeout;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -38,18 +40,23 @@ namespace PaymentService.Infrastructure.Handlers
                     string? errorMessage = null;
                     if (exception != null)
                     {
-                        errorMessage = exception.Message;
+                        errorMessage = exception.InnerException != null
+                            ? $"{exception.Message} ({exception.InnerException.Message})"
+                            : exception.Message;
+
                         statusCode = exception switch
                         {
-                            TaskCanceledException => 504, // Gateway Timeout
-                            HttpRequestException => 503,  // Service Unreachable
+                            TimeoutRejectedException or TaskCanceledException => 504, // Gateway Timeout
+                            BrokenCircuitException or HttpRequestException => 503,  // Service Unreachable
                             _ => 500                      // Server Error
                         };
                     }
                     else if (response != null && !response.IsSuccessStatusCode)
                     {
                         statusCode = (int)response.StatusCode;
-                        errorMessage = $"Gateway returned HTTP {statusCode}";
+                        errorMessage = !string.IsNullOrWhiteSpace(response.ReasonPhrase)
+                            ? $"Gateway returned HTTP {statusCode}: {response.ReasonPhrase}"
+                            : $"Gateway returned HTTP {statusCode}";
                     }
                     else
                     {
