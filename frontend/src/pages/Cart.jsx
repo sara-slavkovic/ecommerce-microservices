@@ -10,9 +10,13 @@ import { getImageUrl } from "../api/catalogService";
 import { getErrorMessage } from "../api/errorHandling";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../hooks/useToast";
+import { useCart } from "../hooks/useCart";
 
 function Cart() {
   const { user } = useAuth();
+  const showToast = useToast();
+  const { refreshCartCount } = useCart();
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -46,8 +50,9 @@ function Cart() {
           (item) => item.productId !== productId,
         ),
       }));
+      refreshCartCount();
     } catch (err) {
-      alert(getErrorMessage(err, "Failed to remove item."));
+      showToast(getErrorMessage(err, "Failed to remove item."), "error");
     }
   };
 
@@ -66,8 +71,9 @@ function Cart() {
             : i,
         ),
       }));
+      refreshCartCount();
     } catch (err) {
-      alert(getErrorMessage(err, "Failed to update quantity."));
+      showToast(getErrorMessage(err, "Failed to update quantity."), "error");
     } finally {
       // Forces QuantityInput to remount and re-sync with the real (current) quantity, whether the update succeeded or failed.
       setRefreshKey((prev) => prev + 1);

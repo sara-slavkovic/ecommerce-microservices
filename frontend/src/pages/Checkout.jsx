@@ -9,9 +9,11 @@ import { createOrder } from "../api/orderService";
 import { initiatePayment } from "../api/paymentService";
 import { getErrorMessage } from "../api/errorHandling";
 import { useAuth } from "../hooks/useAuth";
+import { useCart } from "../hooks/useCart";
 
 function Checkout() {
   const { user } = useAuth();
+  const { refreshCartCount } = useCart();
   const navigate = useNavigate();
 
   const [cart, setCart] = useState(null);
@@ -57,6 +59,7 @@ function Checkout() {
 
       if (payment.status === "Succeeded") {
         setResult({ status: "success" });
+        refreshCartCount();
       } else {
         setResult({
           status: "failed",

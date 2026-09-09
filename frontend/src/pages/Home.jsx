@@ -6,10 +6,12 @@ import { addItemToCart } from "../api/cartService";
 import { getErrorMessage } from "../api/errorHandling";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/useToast";
+import { useCart } from "../hooks/useCart";
 
 function Home() {
   const { user } = useAuth();
   const showToast = useToast();
+  const { refreshCartCount } = useCart();
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -32,6 +34,7 @@ function Home() {
     try {
       await addItemToCart(user.id, product.id, 1);
       showToast(`${product.name} added to cart!`, "success");
+      refreshCartCount();
     } catch (err) {
       showToast(getErrorMessage(err, "Failed to add to cart."), "error");
     }
