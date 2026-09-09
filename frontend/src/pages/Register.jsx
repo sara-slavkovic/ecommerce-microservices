@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { register } from "../api/userService";
 import { getErrorMessage } from "../api/errorHandling";
+import AuthFormCard from "../components/AuthFormCard";
 import { useNavigate } from "react-router-dom";
 
 function Register() {
@@ -35,17 +36,7 @@ function Register() {
   };
 
   return (
-    <div
-      style={{
-        maxWidth: "400px",
-        margin: "80px auto",
-        padding: "30px",
-        backgroundColor: "var(--card-bg)",
-        borderRadius: "8px",
-        textAlign: "center",
-      }}
-    >
-      <h2>Register</h2>
+    <AuthFormCard title="Login">
       {error && <p style={{ color: "#b33" }}>{error}</p>}
       {message && <p style={{ fontWeight: "bold" }}>{message}</p>}
       <form onSubmit={handleRegister}>
@@ -84,7 +75,7 @@ function Register() {
           Create Account
         </button>
       </form>
-    </div>
+    </AuthFormCard>
   );
 }
 

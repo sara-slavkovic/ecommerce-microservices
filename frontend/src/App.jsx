@@ -7,6 +7,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
 import ProductDetails from "./pages/ProductDetails";
+import EditProfile from "./pages/EditProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ToastProvider } from "./hooks/useToast";
 import { CartProvider } from "./hooks/useCart";
@@ -57,6 +58,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ProductDetails />
+                </ProtectedRoute>
+              }
+            />{" "}
+            <Route
+              path="/profile/edit"
+              element={
+                <ProtectedRoute>
+                  <EditProfile />
                 </ProtectedRoute>
               }
             />

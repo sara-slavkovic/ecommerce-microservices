@@ -7,3 +7,7 @@ export function login(credentials) {
 export function register(userData) {
   return userApi.post('/users/register', userData).then(res => res.data);
 }
+
+export function updateUser(id, dto) {
+  return userApi.put(`/users/${id}`, dto).then(res => res.data);
+}

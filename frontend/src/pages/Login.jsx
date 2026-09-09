@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { login } from "../api/userService";
 import { getErrorMessage } from "../api/errorHandling";
+import AuthFormCard from "../components/AuthFormCard";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
@@ -29,17 +30,7 @@ function Login() {
   };
 
   return (
-    <div
-      style={{
-        maxWidth: "400px",
-        margin: "80px auto",
-        padding: "30px",
-        backgroundColor: "var(--card-bg)",
-        borderRadius: "8px",
-        textAlign: "center",
-      }}
-    >
-      <h2>Login</h2>
+    <AuthFormCard title="Login">
       {error && <p style={{ color: "#b33" }}>{error}</p>}
       {message && <p style={{ fontWeight: "bold" }}>{message}</p>}
       <form onSubmit={handleLogin}>
@@ -61,7 +52,7 @@ function Login() {
           Login
         </button>
       </form>
-    </div>
+    </AuthFormCard>
   );
 }
 

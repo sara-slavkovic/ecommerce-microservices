@@ -46,7 +46,7 @@ function Navbar() {
           )}
         </Link>
         <Link to="/orders">Orders</Link>
-        <span style={{ fontWeight: "bold" }}>{user?.fullName}</span>
+        <Link to="/profile/edit">{user?.fullName}</Link>
         <button
           onClick={logout}
           style={{ padding: "6px 16px", fontSize: "0.9rem" }}
