@@ -37,11 +37,19 @@ button:hover {
   background-color: #5a4f5e;
 }
 
-input {
+input, textarea {
   padding: 10px;
   border: 1px solid var(--accent);
   border-radius: 5px;
   width: 100%;
   box-sizing: border-box;
   margin-bottom: 15px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
 }

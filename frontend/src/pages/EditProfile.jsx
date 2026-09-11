@@ -45,17 +45,7 @@ function EditProfile() {
   return (
     <div style={{ minHeight: "100vh" }}>
       <Navbar />
-      <div
-        style={{
-          maxWidth: "400px",
-          margin: "60px auto",
-          padding: "30px",
-          backgroundColor: "var(--card-bg)",
-          borderRadius: "8px",
-          textAlign: "center",
-        }}
-      >
-        <h2>Edit Profile</h2>
+      <AuthFormCard title="Edit Profile">
         {error && <p style={{ color: "#b33" }}>{error}</p>}
         <form onSubmit={handleSubmit}>
           <input
@@ -92,7 +82,7 @@ function EditProfile() {
             {saving ? "Saving..." : "Save Changes"}
           </button>
         </form>
-      </div>
+      </AuthFormCard>
     </div>
   );
 }

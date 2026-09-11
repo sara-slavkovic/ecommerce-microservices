@@ -28,7 +28,7 @@ export function CartProvider({ children }) {
         setItemCount(count);
       })
       .catch(() => setItemCount(0)); // silent - badge just won't show a number
-  }, [user]);
+  }, [user?.id]);
 
   useEffect(() => {
     refreshCartCount();

@@ -5,7 +5,8 @@ export const PORTS = {
   CATALOG: '7038',
   CART: '7252',
   ORDER: '7015',
-  PAYMENT: '7213'
+  PAYMENT: '7213',
+  INVENTORY: '7264'
 };
 
 export const userApi = axios.create({ baseURL: `https://localhost:${PORTS.USER}/api` });
@@ -13,3 +14,4 @@ export const catalogApi = axios.create({ baseURL: `https://localhost:${PORTS.CAT
 export const cartApi = axios.create({ baseURL: `https://localhost:${PORTS.CART}/api` });
 export const orderApi = axios.create({ baseURL: `https://localhost:${PORTS.ORDER}/api` });
 export const paymentApi = axios.create({ baseURL: `https://localhost:${PORTS.PAYMENT}/api` });
+export const inventoryApi = axios.create({ baseURL: `https://localhost:${PORTS.INVENTORY}/api` });

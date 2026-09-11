@@ -21,6 +21,9 @@ function Navbar() {
         <h2 style={{ margin: 0 }}>Beauty Store</h2>
       </Link>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        {user?.username === "sara" && (
+          <Link to="/admin/products">Manage Products</Link>
+        )}
         <Link
           to="/cart"
           style={{ display: "flex", alignItems: "center", gap: "1px" }}
