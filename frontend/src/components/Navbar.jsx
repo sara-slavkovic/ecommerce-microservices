@@ -17,7 +17,27 @@ function Navbar() {
         borderBottom: "1px solid var(--accent)",
       }}
     >
-      <Link to="/home" style={{ textDecoration: "none" }}>
+      <Link
+        to="/home"
+        style={{
+          textDecoration: "none",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+        }}
+      >
+        <img
+          src="/BeautyStoreLogo.png"
+          alt="Beauty Store"
+          width="36"
+          height="36"
+          style={{
+            height: "36px",
+            width: "36px",
+            objectFit: "contain",
+            display: "block",
+          }}
+        />
         <h2 style={{ margin: 0 }}>Beauty Store</h2>
       </Link>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>

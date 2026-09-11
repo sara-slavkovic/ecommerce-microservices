@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import QuantityInput from "../components/QuantityInput";
 import Spinner from "../components/Spinner";
 import { getProductById, getImageUrl } from "../api/catalogService";
@@ -47,7 +46,6 @@ function ProductDetails() {
   if (loading) {
     return (
       <div style={{ minHeight: "100vh" }}>
-        <Navbar />
         <Spinner text="Loading product..." />
       </div>
     );
@@ -56,7 +54,6 @@ function ProductDetails() {
   if (error) {
     return (
       <div style={{ minHeight: "100vh" }}>
-        <Navbar />
         <div
           style={{
             maxWidth: "500px",
@@ -76,7 +73,6 @@ function ProductDetails() {
 
   return (
     <div style={{ minHeight: "100vh" }}>
-      <Navbar />
       <div style={{ padding: "2rem", maxWidth: "1000px", margin: "0 auto" }}>
         <button
           onClick={() => navigate("/home")}

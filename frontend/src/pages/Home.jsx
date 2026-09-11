@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
 import ProductCard from "../components/ProductCard";
 import CategoryFilter from "../components/CategoryFilter";
 import Spinner from "../components/Spinner";
@@ -66,7 +65,6 @@ function Home() {
   if (loading) {
     return (
       <div style={{ minHeight: "100vh" }}>
-        <Navbar />
         <Spinner text="Loading products..." />
       </div>
     );
@@ -75,7 +73,6 @@ function Home() {
   if (error) {
     return (
       <div style={{ minHeight: "100vh" }}>
-        <Navbar />
         <div
           style={{
             maxWidth: "500px",
@@ -95,7 +92,6 @@ function Home() {
 
   return (
     <div style={{ minHeight: "100vh" }}>
-      <Navbar />
       <div
         style={{
           padding: "2rem 3rem",

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
 import OrderCard from "../components/OrderCard";
 import Spinner from "../components/Spinner";
 import { getOrdersByUserId } from "../api/orderService";
@@ -29,7 +28,6 @@ function Orders() {
   if (loading) {
     return (
       <div style={{ minHeight: "100vh" }}>
-        <Navbar />
         <Spinner text="Loading orders..." />
       </div>
     );
@@ -38,7 +36,6 @@ function Orders() {
   if (error) {
     return (
       <div style={{ minHeight: "100vh" }}>
-        <Navbar />
         <div
           style={{
             maxWidth: "500px",
@@ -58,7 +55,6 @@ function Orders() {
 
   return (
     <div style={{ minHeight: "100vh" }}>
-      <Navbar />
       <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>
         <h1
           style={{

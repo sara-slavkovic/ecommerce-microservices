@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import ShippingForm from "../components/ShippingForm";
 import PaymentForm from "../components/PaymentForm";
 import OrderSummary from "../components/OrderSummary";
@@ -83,7 +82,6 @@ function Checkout() {
   if (loading) {
     return (
       <div style={{ minHeight: "100vh" }}>
-        <Navbar />
         <Spinner text="Loading checkout..." />
       </div>
     );
@@ -92,7 +90,6 @@ function Checkout() {
   if (loadError) {
     return (
       <div style={{ minHeight: "100vh" }}>
-        <Navbar />
         <div
           style={{
             maxWidth: "500px",
@@ -115,7 +112,6 @@ function Checkout() {
   if (items.length === 0 && !result) {
     return (
       <div style={{ minHeight: "100vh" }}>
-        <Navbar />
         <div
           style={{
             maxWidth: "500px",
@@ -142,7 +138,6 @@ function Checkout() {
   if (processing) {
     return (
       <div style={{ minHeight: "100vh" }}>
-        <Navbar />
         <div
           style={{
             maxWidth: "500px",
@@ -163,7 +158,6 @@ function Checkout() {
   if (result) {
     return (
       <div style={{ minHeight: "100vh" }}>
-        <Navbar />
         <div
           style={{
             maxWidth: "500px",
@@ -209,7 +203,6 @@ function Checkout() {
 
   return (
     <div style={{ minHeight: "100vh" }}>
-      <Navbar />
       <div
         style={{
           padding: "2rem",

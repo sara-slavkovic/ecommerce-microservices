@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import AuthFormCard from "../components/AuthFormCard";
 import { updateUser } from "../api/userService";
 import { getErrorMessage } from "../api/errorHandling";
@@ -44,7 +43,6 @@ function EditProfile() {
 
   return (
     <div style={{ minHeight: "100vh" }}>
-      <Navbar />
       <AuthFormCard title="Edit Profile">
         {error && <p style={{ color: "#b33" }}>{error}</p>}
         <form onSubmit={handleSubmit}>

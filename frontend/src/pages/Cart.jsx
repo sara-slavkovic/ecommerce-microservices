@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
 import QuantityInput from "../components/QuantityInput";
 import Spinner from "../components/Spinner";
 import {
@@ -85,14 +84,12 @@ function Cart() {
   if (loading)
     return (
       <div style={{ minHeight: "100vh" }}>
-        <Navbar />
         <Spinner text="Loading cart..." />
       </div>
     );
   if (error)
     return (
       <div style={{ minHeight: "100vh" }}>
-        <Navbar />
         <div
           style={{
             maxWidth: "500px",
@@ -114,7 +111,6 @@ function Cart() {
 
   return (
     <div style={{ minHeight: "100vh" }}>
-      <Navbar />
       <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
         <h1
           style={{

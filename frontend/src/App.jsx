@@ -11,6 +11,7 @@ import EditProfile from "./pages/EditProfile";
 import AdminProducts from "./pages/AdminProducts";
 import AdminRoute from "./components/AdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Layout from "./components/Layout";
 import { ToastProvider } from "./hooks/useToast";
 import { CartProvider } from "./hooks/useCart";
 import { ConfirmProvider } from "./hooks/useConfirm";
@@ -26,58 +27,26 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route
-                path="/home"
                 element={
                   <ProtectedRoute>
-                    <Home />
+                    <Layout />
                   </ProtectedRoute>
                 }
-              />
-              <Route
-                path="/cart"
-                element={
-                  <ProtectedRoute>
-                    <Cart />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/checkout"
-                element={
-                  <ProtectedRoute>
-                    <Checkout />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/orders"
-                element={
-                  <ProtectedRoute>
-                    <Orders />
-                  </ProtectedRoute>
-                }
-              />{" "}
-              <Route
-                path="/product/:id"
-                element={
-                  <ProtectedRoute>
-                    <ProductDetails />
-                  </ProtectedRoute>
-                }
-              />{" "}
-              <Route
-                path="/profile/edit"
-                element={
-                  <ProtectedRoute>
-                    <EditProfile />
-                  </ProtectedRoute>
-                }
-              />
+              >
+                <Route path="/home" element={<Home />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/orders" element={<Orders />} />
+                <Route path="/product/:id" element={<ProductDetails />} />
+                <Route path="/profile/edit" element={<EditProfile />} />
+              </Route>
               <Route
                 path="/admin/products"
                 element={
                   <AdminRoute>
-                    <AdminProducts />
+                    <Layout>
+                      <AdminProducts />
+                    </Layout>
                   </AdminRoute>
                 }
               />
