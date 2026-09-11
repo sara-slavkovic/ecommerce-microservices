@@ -2,6 +2,7 @@ import { useState } from "react";
 
 function CategoryFilter({ categories, selectedId, onSelect }) {
   const [expandedIds, setExpandedIds] = useState(new Set());
+  const [hoveredId, setHoveredId] = useState(null);
 
   const topLevel = categories.filter((c) => !c.parentCategoryId);
   const childrenOf = (parentId) =>
@@ -15,6 +16,19 @@ function CategoryFilter({ categories, selectedId, onSelect }) {
     });
   };
 
+  const rowStyle = (id, isSelected) => ({
+    padding: "8px 10px",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontWeight: isSelected ? "bold" : "normal",
+    backgroundColor: isSelected
+      ? "var(--accent)"
+      : hoveredId === id
+        ? "rgba(208, 184, 168, 0.4)"
+        : "transparent",
+    transition: "background-color 0.15s ease",
+  });
+
   return (
     <div
       style={{
@@ -26,14 +40,9 @@ function CategoryFilter({ categories, selectedId, onSelect }) {
     >
       <div
         onClick={() => onSelect(null)}
-        style={{
-          padding: "8px 10px",
-          borderRadius: "5px",
-          cursor: "pointer",
-          fontWeight: selectedId === null ? "bold" : "normal",
-          backgroundColor:
-            selectedId === null ? "var(--accent)" : "transparent",
-        }}
+        onMouseEnter={() => setHoveredId("all")}
+        onMouseLeave={() => setHoveredId(null)}
+        style={rowStyle("all", selectedId === null)}
       >
         All Products
       </div>
@@ -45,16 +54,13 @@ function CategoryFilter({ categories, selectedId, onSelect }) {
         return (
           <div key={parent.id}>
             <div
+              onMouseEnter={() => setHoveredId(parent.id)}
+              onMouseLeave={() => setHoveredId(null)}
               style={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                padding: "8px 10px",
-                borderRadius: "5px",
-                cursor: "pointer",
-                fontWeight: selectedId === parent.id ? "bold" : "normal",
-                backgroundColor:
-                  selectedId === parent.id ? "var(--accent)" : "transparent",
+                ...rowStyle(parent.id, selectedId === parent.id),
               }}
             >
               <span onClick={() => onSelect(parent.id)} style={{ flex: 1 }}>
@@ -75,14 +81,12 @@ function CategoryFilter({ categories, selectedId, onSelect }) {
                 <div
                   key={child.id}
                   onClick={() => onSelect(child.id)}
+                  onMouseEnter={() => setHoveredId(child.id)}
+                  onMouseLeave={() => setHoveredId(null)}
                   style={{
+                    ...rowStyle(child.id, selectedId === child.id),
                     padding: "6px 10px 6px 25px",
-                    borderRadius: "5px",
-                    cursor: "pointer",
                     fontSize: "0.9rem",
-                    fontWeight: selectedId === child.id ? "bold" : "normal",
-                    backgroundColor:
-                      selectedId === child.id ? "var(--accent)" : "transparent",
                   }}
                 >
                   {child.name}

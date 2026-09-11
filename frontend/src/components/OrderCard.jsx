@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { getImageUrl } from "../api/catalogService";
 import { Link } from "react-router-dom";
+import { getImageUrl } from "../api/catalogService";
 
 const STATUS_COLORS = {
   Created: "#8a8a8a",
@@ -11,6 +11,7 @@ const STATUS_COLORS = {
 
 function OrderCard({ order }) {
   const [expanded, setExpanded] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const statusColor = STATUS_COLORS[order.status] || "var(--accent)";
 
   return (
@@ -20,10 +21,16 @@ function OrderCard({ order }) {
         borderRadius: "8px",
         padding: "20px",
         marginBottom: "15px",
+        borderLeft: hovered
+          ? "4px solid var(--text-main)"
+          : "4px solid transparent",
+        transition: "border-left-color 0.25s ease",
       }}
     >
       <div
         onClick={() => setExpanded(!expanded)}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         style={{
           display: "flex",
           justifyContent: "space-between",
@@ -33,7 +40,7 @@ function OrderCard({ order }) {
       >
         <div>
           <p style={{ margin: 0, fontSize: "0.9rem" }}>
-            {new Date(order.createdAt).toDateString()}
+            {new Date(order.createdAt).toLocaleDateString()}
           </p>
           <p style={{ margin: "4px 0 0 0", fontWeight: "bold" }}>
             Order #{order.id.slice(0, 8)}

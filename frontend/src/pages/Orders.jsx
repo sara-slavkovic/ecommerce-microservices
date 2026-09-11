@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import OrderCard from "../components/OrderCard";
+import Spinner from "../components/Spinner";
 import { getOrdersByUserId } from "../api/orderService";
 import { getErrorMessage } from "../api/errorHandling";
 import { useAuth } from "../hooks/useAuth";
@@ -29,9 +30,7 @@ function Orders() {
     return (
       <div style={{ minHeight: "100vh" }}>
         <Navbar />
-        <div style={{ padding: "4rem 2rem", textAlign: "center" }}>
-          Loading orders...
-        </div>
+        <Spinner text="Loading orders..." />
       </div>
     );
   }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import ProductCard from "../components/ProductCard";
 import CategoryFilter from "../components/CategoryFilter";
+import Spinner from "../components/Spinner";
 import { getAllProducts } from "../api/catalogService";
 import { getAllCategories } from "../api/catalogService";
 import { addItemToCart } from "../api/cartService";
@@ -66,9 +67,7 @@ function Home() {
     return (
       <div style={{ minHeight: "100vh" }}>
         <Navbar />
-        <div style={{ padding: "4rem 2rem", textAlign: "center" }}>
-          Loading products...
-        </div>
+        <Spinner text="Loading products..." />
       </div>
     );
   }

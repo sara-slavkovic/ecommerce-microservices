@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import QuantityInput from "../components/QuantityInput";
+import Spinner from "../components/Spinner";
 import {
   getCartByUserId,
   removeCartItem,
@@ -85,9 +86,7 @@ function Cart() {
     return (
       <div style={{ minHeight: "100vh" }}>
         <Navbar />
-        <div style={{ padding: "4rem 2rem", textAlign: "center" }}>
-          Loading cart...
-        </div>
+        <Spinner text="Loading cart..." />
       </div>
     );
   if (error)

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   uploadProductImage,
   createProduct,
@@ -13,6 +13,7 @@ function ProductForm({ categories, onCreated }) {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     sku: "",
@@ -117,10 +118,19 @@ function ProductForm({ categories, onCreated }) {
           <input
             type="file"
             accept="image/*"
+            ref={fileInputRef}
             onChange={handleImageSelect}
             disabled={!formData.name.trim() || uploading}
-            style={{ marginTop: "5px" }}
+            style={{ display: "none" }}
           />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current.click()}
+            disabled={!formData.name.trim() || uploading}
+            style={{ marginTop: "5px" }}
+          >
+            Choose Image
+          </button>
           {uploading && (
             <p style={{ fontSize: "0.9rem" }}>Uploading image...</p>
           )}

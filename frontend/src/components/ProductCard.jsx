@@ -1,22 +1,30 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getImageUrl } from "../api/catalogService";
 
 function ProductCard({ product, onAddToCart }) {
   const navigate = useNavigate();
+  const [hovered, setHovered] = useState(false);
   const imageUrl = getImageUrl(product.imageUrl);
 
   return (
     <div
       onClick={() => navigate(`/product/${product.id}`)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         backgroundColor: "var(--card-bg)",
         borderRadius: "8px",
         padding: "15px",
         textAlign: "center",
-        boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
+        boxShadow: hovered
+          ? "0 10px 20px rgba(0,0,0,0.12)"
+          : "0 4px 6px rgba(0,0,0,0.05)",
         cursor: "pointer",
         display: "flex",
         flexDirection: "column",
+        transform: hovered ? "translateY(-4px)" : "translateY(0)",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
       }}
     >
       <img

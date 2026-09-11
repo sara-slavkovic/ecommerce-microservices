@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import ProductForm from "../components/ProductForm";
 import AdminProductRow from "../components/AdminProductRow";
+import Spinner from "../components/Spinner";
 import { getAllProducts, getAllCategories } from "../api/catalogService";
 import { getErrorMessage } from "../api/errorHandling";
 
@@ -43,9 +44,7 @@ function AdminProducts() {
     return (
       <div style={{ minHeight: "100vh" }}>
         <Navbar />
-        <div style={{ padding: "4rem 2rem", textAlign: "center" }}>
-          Loading admin panel...
-        </div>
+        <Spinner text="Loading admin panel..." />
       </div>
     );
   }

@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import ShippingForm from "../components/ShippingForm";
 import PaymentForm from "../components/PaymentForm";
 import OrderSummary from "../components/OrderSummary";
+import Spinner from "../components/Spinner";
 import { getCartByUserId } from "../api/cartService";
 import { createOrder } from "../api/orderService";
 import { initiatePayment } from "../api/paymentService";
@@ -83,9 +84,7 @@ function Checkout() {
     return (
       <div style={{ minHeight: "100vh" }}>
         <Navbar />
-        <div style={{ padding: "4rem 2rem", textAlign: "center" }}>
-          Loading checkout...
-        </div>
+        <Spinner text="Loading checkout..." />
       </div>
     );
   }

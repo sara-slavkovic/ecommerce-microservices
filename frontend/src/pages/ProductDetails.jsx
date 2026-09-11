@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import QuantityInput from "../components/QuantityInput";
+import Spinner from "../components/Spinner";
 import { getProductById, getImageUrl } from "../api/catalogService";
 import { addItemToCart } from "../api/cartService";
 import { getErrorMessage } from "../api/errorHandling";
@@ -20,6 +21,7 @@ function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [backHovered, setBackHovered] = useState(false);
 
   useEffect(() => {
     getProductById(id)
@@ -46,9 +48,7 @@ function ProductDetails() {
     return (
       <div style={{ minHeight: "100vh" }}>
         <Navbar />
-        <div style={{ padding: "4rem 2rem", textAlign: "center" }}>
-          Loading product...
-        </div>
+        <Spinner text="Loading product..." />
       </div>
     );
   }
@@ -80,13 +80,16 @@ function ProductDetails() {
       <div style={{ padding: "2rem", maxWidth: "1000px", margin: "0 auto" }}>
         <button
           onClick={() => navigate("/home")}
+          onMouseEnter={() => setBackHovered(true)}
+          onMouseLeave={() => setBackHovered(false)}
           style={{
             marginBottom: "1.5rem",
             fontSize: "0.85rem",
             padding: "6px 14px",
-            backgroundColor: "transparent",
-            color: "var(--text-main)",
+            backgroundColor: backHovered ? "var(--text-main)" : "transparent",
+            color: backHovered ? "var(--bg-color)" : "var(--text-main)",
             border: "1px solid var(--text-main)",
+            transition: "background-color 0.15s ease, color 0.15s ease",
           }}
         >
           ← Back to Shop
