@@ -1,4 +1,4 @@
-import { catalogApi, PORTS } from './axiosInstances';
+import { catalogApi, GATEWAY_URL } from './axiosInstances';
 
 export function getAllProducts() {
   return catalogApi.get('/products').then(res => res.data);
@@ -13,8 +13,16 @@ export function getProductById(id) {
 }
 
 export function getImageUrl(path) {
-  if (!path || !path.startsWith('images')) return 'https://via.placeholder.com/230?text=No+Image';
-  return `https://localhost:${PORTS.CATALOG}/${path}`;
+  if (!path) return 'https://via.placeholder.com/230?text=No+Image';
+
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+  if (!normalizedPath.startsWith('/images')) {
+    return 'https://via.placeholder.com/230?text=No+Image';
+  }
+
+  const gatewayBase = GATEWAY_URL.replace(/\/api\/?$/, '');
+  return `${gatewayBase}${normalizedPath}`;
 }
 
 export function uploadProductImage(file, productName) {

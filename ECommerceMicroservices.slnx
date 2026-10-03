@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/ApiGateway/">
+    <Project Path="src/ApiGateway/ApiGateway/ApiGateway.csproj" Id="041528b6-a3bb-4ca9-a5fd-d428da0db1f1" />
+  </Folder>
   <Folder Name="/Cart/">
     <Project Path="src/Services/Cart/CartService.Api/CartService.Api.csproj" Id="ec9b999f-9016-4735-9d8f-f17303bb1bd2" />
     <Project Path="src/Services/Cart/CartService.Application/CartService.Application.csproj" Id="5c056949-1488-482d-b618-eb99e28b6e5a" />

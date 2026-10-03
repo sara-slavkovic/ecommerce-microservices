@@ -1,17 +1,10 @@
 import axios from 'axios';
 
-export const PORTS = {
-  USER: '7082',
-  CATALOG: '7038',
-  CART: '7252',
-  ORDER: '7015',
-  PAYMENT: '7213',
-  INVENTORY: '7264'
-};
+const GATEWAY_URL = 'https://localhost:7100/api';
 
-export const userApi = axios.create({ baseURL: `https://localhost:${PORTS.USER}/api` });
-export const catalogApi = axios.create({ baseURL: `https://localhost:${PORTS.CATALOG}/api` });
-export const cartApi = axios.create({ baseURL: `https://localhost:${PORTS.CART}/api` });
-export const orderApi = axios.create({ baseURL: `https://localhost:${PORTS.ORDER}/api` });
-export const paymentApi = axios.create({ baseURL: `https://localhost:${PORTS.PAYMENT}/api` });
-export const inventoryApi = axios.create({ baseURL: `https://localhost:${PORTS.INVENTORY}/api` });
+export const userApi = axios.create({ baseURL: GATEWAY_URL });
+export const catalogApi = axios.create({ baseURL: GATEWAY_URL });
+export const cartApi = axios.create({ baseURL: GATEWAY_URL });
+export const orderApi = axios.create({ baseURL: GATEWAY_URL });
+export const paymentApi = axios.create({ baseURL: GATEWAY_URL });
+export const inventoryApi = axios.create({ baseURL: GATEWAY_URL });
