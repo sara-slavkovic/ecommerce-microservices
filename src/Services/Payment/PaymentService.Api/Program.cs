@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel.Infrastructure.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,21 +35,7 @@ var mockGatewayClientBuilder = builder.Services.AddHttpClient<PaymentService.App
     client.BaseAddress = new Uri(builder.Configuration["Services:MockPaymentGateway"] ?? throw new Exception("MockPaymentGateway URL is not configured."));
 });
 // 2. Add Resilience to the builder (Outer layer: handles the retry loop)
-mockGatewayClientBuilder.AddStandardResilienceHandler(options =>
-{
-    options.Retry.MaxRetryAttempts = 3;
-    options.Retry.BackoffType = Polly.DelayBackoffType.Exponential;
-    options.Retry.Delay = TimeSpan.FromSeconds(1);
-    options.Retry.UseJitter = true;
-
-    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(3);
-    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(60);
-
-    options.CircuitBreaker.FailureRatio = 0.5;
-    options.CircuitBreaker.MinimumThroughput = 4;
-    options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
-    options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
-});
+mockGatewayClientBuilder.AddCustomResilienceHandler(builder.Configuration, "ResilienceSettings:MockGateway");
 // 3. Add Tracking Handler to the builder (Inner layer: executes on every single retry attempt)
 mockGatewayClientBuilder.AddHttpMessageHandler<PaymentService.Infrastructure.Handlers.PaymentAttemptTrackingHandler>();
 
@@ -58,21 +45,7 @@ builder.Services.AddHttpClient<PaymentService.Application.Interfaces.IOrderServi
 {
     client.BaseAddress = new Uri(builder.Configuration["Services:OrderService"] ?? throw new Exception("OrderService URL is not configured."));
     client.DefaultRequestHeaders.Add("X-Internal-Api-Key", internalApiKey);
-}).AddStandardResilienceHandler(options =>
-{
-    options.Retry.MaxRetryAttempts = 3;
-    options.Retry.BackoffType = Polly.DelayBackoffType.Exponential;
-    options.Retry.Delay = TimeSpan.FromSeconds(1);
-    options.Retry.UseJitter = true;
-
-    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(30);
-    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(60);
-
-    options.CircuitBreaker.FailureRatio = 0.5;
-    options.CircuitBreaker.MinimumThroughput = 4;
-    options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
-    options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
-});
+}).AddCustomResilienceHandler(builder.Configuration, "ResilienceSettings:Standard");
 
 builder.Services.AddValidatorsFromAssemblyContaining<PaymentService.Application.Validators.InitiatePaymentDtoValidator>(ServiceLifetime.Transient);
 
