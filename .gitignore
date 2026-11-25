@@ -33,6 +33,9 @@ TestResult.xml
 nunit-*.xml
 .vs/
 *.slnLaunch.user
+tests/PerformanceTests/reports_0/
+tests/PerformanceTests/results_0/
+tests/PerformanceTests/reports/
 tests/PerformanceTests/reports/
 
 # ==========================================
