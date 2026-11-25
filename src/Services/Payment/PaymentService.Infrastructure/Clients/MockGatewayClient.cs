@@ -1,5 +1,6 @@
 ﻿using PaymentService.Application.DTOs;
 using PaymentService.Application.Interfaces;
+using PaymentService.Application.Settings;
 using PaymentService.Infrastructure.Handlers;
 using Polly.CircuitBreaker;
 using Polly.Timeout;
@@ -12,11 +13,14 @@ namespace PaymentService.Infrastructure.Clients
 {
     public class MockGatewayClient : IMockGatewayClient
     {
-        private readonly HttpClient _httpClient;
+        // The factory creates a named HttpClient per experiment variant (V0, V1, V2...), each with a different Polly pipeline
+        private readonly IHttpClientFactory _factory;
+        private readonly ExperimentState _experiment;
 
-        public MockGatewayClient(HttpClient httpClient)
+        public MockGatewayClient(IHttpClientFactory factory, ExperimentState experiment)
         {
-            _httpClient = httpClient;
+            _factory = factory;
+            _experiment = experiment;
         }
 
         public async Task<ChargeResultDto> ChargeAsync(ChargeRequestDto dto)
@@ -33,8 +37,10 @@ namespace PaymentService.Infrastructure.Clients
 
             try
             {
-                // 3. Send it (Polly retries will happen inside here)
-                var response = await _httpClient.SendAsync(request);
+                // 3. Pick the client for the current experiment variant and send the request
+                // Polly retries will happen inside here
+                var httpClient = _factory.CreateClient($"gateway-{_experiment.Current.Variant}");
+                var response = await httpClient.SendAsync(request);
 
                 // Try deserializing the gateway's ChargeResultDto (returned on both 200 OK and 503/402 failures)
                 var result = await response.Content.ReadFromJsonAsync<ChargeResultDto>();

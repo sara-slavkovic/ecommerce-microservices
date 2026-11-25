@@ -68,6 +68,9 @@ namespace MockPaymentGateway.Api.Services
                 case SimulationMode.AlwaysFailFatal:
                     return Failure("Payment declined: invalid card details.", 402);
 
+                case SimulationMode.RandomTransient:
+                    return Random.Shared.NextDouble() < request.FailureRate ? Failure("Random transient failure.", 503) : Success();
+
                 case SimulationMode.Random:
                 default:
                     return HandleRandom();

@@ -7,6 +7,7 @@
         AlwaysFail,
         AlwaysFailFatal,
         FailNTimesThenSucceed,
-        SlowResponse
+        SlowResponse,
+        RandomTransient
     }
 }

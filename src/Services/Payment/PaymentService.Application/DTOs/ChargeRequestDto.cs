@@ -12,5 +12,6 @@ namespace PaymentService.Application.DTOs
         public string IdempotencyKey { get; set; } = string.Empty;
         public string SimulationMode { get; set; } = "Random";
         public int FailCount { get; set; } = 0;
+        public double FailureRate { get; set; } = 0;
     }
 }

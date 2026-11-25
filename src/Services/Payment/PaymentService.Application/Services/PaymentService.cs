@@ -19,14 +19,16 @@ namespace PaymentService.Application.Services
         private readonly IOrderServiceClient _orderServiceClient;
         private readonly IValidator<InitiatePaymentDto> _initiateValidator;
         private readonly PaymentSimulationSettings _simulationSettings;
+        private readonly ExperimentState _experiment;
 
-        public PaymentService(IPaymentRepository paymentRepository, IMockGatewayClient mockGatewayClient, IOrderServiceClient orderServiceClient, IValidator<InitiatePaymentDto> initiateValidator, IOptionsSnapshot<PaymentSimulationSettings> simulationSettings)
+        public PaymentService(IPaymentRepository paymentRepository, IMockGatewayClient mockGatewayClient, IOrderServiceClient orderServiceClient, IValidator<InitiatePaymentDto> initiateValidator, IOptionsSnapshot<PaymentSimulationSettings> simulationSettings, ExperimentState experiment)
         {
             _paymentRepository = paymentRepository;
             _mockGatewayClient = mockGatewayClient;
             _orderServiceClient = orderServiceClient;
             _initiateValidator = initiateValidator;
             _simulationSettings = simulationSettings.Value;
+            _experiment = experiment;
         }
 
         public async Task<PaymentDto?> GetPaymentByIdAsync(Guid id)
@@ -73,6 +75,7 @@ namespace PaymentService.Application.Services
             var idempotencyKey = Guid.NewGuid().ToString();
 
             // 1. Call Gateway (Polly executes retries inside the HttpClient pipeline)
+            var exp = _experiment.Current;
             var chargeResult = await _mockGatewayClient.ChargeAsync(new ChargeRequestDto
             {
                 OrderId = dto.OrderId,
@@ -81,8 +84,9 @@ namespace PaymentService.Application.Services
                 //SimulationMode = "Random"
                 //SimulationMode = "FailNTimesThenSucceed",
                 //FailCount = 2
-                SimulationMode = _simulationSettings.Mode,
-                FailCount = _simulationSettings.FailCount
+                SimulationMode = exp.Mode ?? _simulationSettings.Mode,
+                FailCount = _simulationSettings.FailCount,
+                FailureRate = exp.FailureRate
             });
 
             // 2. Build Payment aggregate

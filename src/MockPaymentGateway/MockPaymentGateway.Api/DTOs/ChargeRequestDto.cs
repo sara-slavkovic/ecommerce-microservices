@@ -9,5 +9,6 @@ namespace MockPaymentGateway.Api.DTOs
         public string IdempotencyKey { get; set; } = string.Empty;
         public SimulationMode SimulationMode { get; set; } = SimulationMode.Random;
         public int FailCount { get; set; } = 0;
+        public double FailureRate { get; set; }
     }
 }
