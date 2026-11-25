@@ -1,13 +1,8 @@
 ﻿using FluentValidation;
 using InventoryService.Application.DTOs;
 using InventoryService.Application.Interfaces;
-using InventoryService.Application.Validators;
 using InventoryService.Domain.Entities;
 using SharedKernel.Domain.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace InventoryService.Application.Services
 {
@@ -17,6 +12,21 @@ namespace InventoryService.Application.Services
         private readonly IValidator<CreateInventoryItemDto> _createValidator;
         private readonly IValidator<ChangeInventoryQuantityDto> _quantityChangeValidator;
 
+        // One lock for the whole service: inventory changes run one after another, so two requests can never read the same number and overwrite each other's change
+        private static readonly SemaphoreSlim _stockLock = new(1, 1);
+
+        private static async Task<T> WithStockLockAsync<T>(Func<Task<T>> operation)
+        {
+            await _stockLock.WaitAsync();
+            try
+            {
+                return await operation();
+            }
+            finally
+            {
+                _stockLock.Release();
+            }
+        }
         public InventoryService(IInventoryRepository inventoryRepository, IValidator<CreateInventoryItemDto> createValidator, IValidator<ChangeInventoryQuantityDto> quantityChangeValidator)
         {
             _inventoryRepository = inventoryRepository;
@@ -106,24 +116,27 @@ namespace InventoryService.Application.Services
                 throw new ValidationException(validationResult.Errors);
             }
 
-            var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
-            if (inventoryItem == null)
+            return await WithStockLockAsync(async () =>
             {
-                throw new NotFoundException("Inventory item not found.");
-            }
+                var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
+                if (inventoryItem == null)
+                {
+                    throw new NotFoundException("Inventory item not found.");
+                }
 
-            if (inventoryItem.AvailableQuantity < dto.Quantity)
-            {
-                throw new ConflictException("Not enough available stock.");
-            }
+                if (inventoryItem.AvailableQuantity < dto.Quantity)
+                {
+                    throw new ConflictException("Not enough available stock.");
+                }
 
-            inventoryItem.AvailableQuantity -= dto.Quantity;
-            inventoryItem.ReservedQuantity += dto.Quantity;
-            inventoryItem.LastUpdatedAt = DateTime.Now;
+                inventoryItem.AvailableQuantity -= dto.Quantity;
+                inventoryItem.ReservedQuantity += dto.Quantity;
+                inventoryItem.LastUpdatedAt = DateTime.Now;
 
-            await _inventoryRepository.SaveChangesAsync();
+                await _inventoryRepository.SaveChangesAsync();
 
-            return MapToDto(inventoryItem);
+                return MapToDto(inventoryItem);
+            });
         }
 
         //when order or payment fails or order gets cancelled
@@ -135,24 +148,27 @@ namespace InventoryService.Application.Services
                 throw new ValidationException(validationResult.Errors);
             }
 
-            var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
-            if (inventoryItem == null)
+            return await WithStockLockAsync(async () =>
             {
-                throw new NotFoundException("Inventory item not found.");
-            }
+                var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
+                if (inventoryItem == null)
+                {
+                    throw new NotFoundException("Inventory item not found.");
+                }
 
-            if (dto.Quantity > inventoryItem.ReservedQuantity)
-            {
-                throw new ConflictException("Not enough reserved stock to release.");
-            }
+                if (dto.Quantity > inventoryItem.ReservedQuantity)
+                {
+                    throw new ConflictException("Not enough reserved stock to release.");
+                }
 
-            inventoryItem.ReservedQuantity -= dto.Quantity;
-            inventoryItem.AvailableQuantity += dto.Quantity;
-            inventoryItem.LastUpdatedAt = DateTime.Now;
+                inventoryItem.ReservedQuantity -= dto.Quantity;
+                inventoryItem.AvailableQuantity += dto.Quantity;
+                inventoryItem.LastUpdatedAt = DateTime.Now;
 
-            await _inventoryRepository.SaveChangesAsync();
+                await _inventoryRepository.SaveChangesAsync();
 
-            return MapToDto(inventoryItem);
+                return MapToDto(inventoryItem);
+            });
         }
 
         public async Task<InventoryItemDto> ConfirmDeductionAsync(ChangeInventoryQuantityDto dto)
@@ -163,23 +179,26 @@ namespace InventoryService.Application.Services
                 throw new ValidationException(validationResult.Errors);
             }
 
-            var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
-            if (inventoryItem == null)
+            return await WithStockLockAsync(async () =>
             {
-                throw new NotFoundException("Inventory item not found.");
-            }
+                var inventoryItem = await _inventoryRepository.GetInventoryItemByProductIdAsync(dto.ProductId);
+                if (inventoryItem == null)
+                {
+                    throw new NotFoundException("Inventory item not found.");
+                }
 
-            if (inventoryItem.ReservedQuantity < dto.Quantity)
-            {
-                throw new ConflictException("Not enough reserved stock to confirm deduction.");
-            }
+                if (inventoryItem.ReservedQuantity < dto.Quantity)
+                {
+                    throw new ConflictException("Not enough reserved stock to confirm deduction.");
+                }
 
-            inventoryItem.ReservedQuantity -= dto.Quantity;
-            inventoryItem.LastUpdatedAt = DateTime.Now;
+                inventoryItem.ReservedQuantity -= dto.Quantity;
+                inventoryItem.LastUpdatedAt = DateTime.Now;
 
-            await _inventoryRepository.SaveChangesAsync();
+                await _inventoryRepository.SaveChangesAsync();
 
-            return MapToDto(inventoryItem);
+                return MapToDto(inventoryItem);
+            });
         }
 
         public async Task<InventoryItemDto> RestockInventoryAsync(ChangeInventoryQuantityDto dto)
